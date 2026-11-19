@@ -32,12 +32,12 @@ type RVerb = "doler" | "gustar" | "encantar";
 type DativeKey = "yo" | "tú" | "él" | "nosotros" | "ellos";
 type RTense = "present" | "imperfect" | "preterite";
 
-const DATIVE_MAP: Record<DativeKey, { a: string; iop: string; en: string }> = {
-  yo: { a: "A mí", iop: "me", en: "I / my" },
-  tú: { a: "A ti", iop: "te", en: "you / your" },
-  él: { a: "A mi hermana", iop: "le", en: "my sister / her" },
-  nosotros: { a: "A nosotros", iop: "nos", en: "we / our" },
-  ellos: { a: "A los atletas", iop: "les", en: "the athletes / their" },
+const DATIVE_MAP: Record<DativeKey, { a: string; iop: string; en: string; poss: string }> = {
+  yo: { a: "A mí", iop: "me", en: "I / my", poss: "My" },
+  tú: { a: "A ti", iop: "te", en: "you / your", poss: "Your" },
+  él: { a: "A mi hermana", iop: "le", en: "my sister / her", poss: "My sister's" },
+  nosotros: { a: "A nosotros", iop: "nos", en: "we / our", poss: "Our" },
+  ellos: { a: "A los atletas", iop: "les", en: "the athletes / their", poss: "The athletes'" },
 };
 
 const DOLER_SUBJECTS = [
@@ -89,7 +89,7 @@ function ReverseVerbBuilder() {
 
   const englishMeaning =
     verb === "doler"
-      ? `${dat.en[0].toUpperCase() + dat.en.slice(1)} ${subj.en} ${
+      ? `${dat.poss} ${subj.en} ${
           tense === "present"
             ? subj.plural
               ? "hurt"
@@ -337,7 +337,7 @@ function RestaurantInspector() {
         ) : (
           <span>
             <strong>Mark-Saver:</strong> Never write <em>pedir por</em> or <em>preguntar la cuenta</em> —{" "}
-            <strong>pedir</strong> (*pido, pidió, pidieron*) orders objects; <strong>preguntar</strong> asks questions!
+            <strong>pedir</strong> (<em>pido, pidió, pidieron</em>) orders objects; <strong>preguntar</strong> asks questions!
           </span>
         )
       }

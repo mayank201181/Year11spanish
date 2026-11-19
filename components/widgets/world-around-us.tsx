@@ -313,7 +313,7 @@ function DigitalDebateBuilderWidget() {
       ]}
       caption={
         <div>
-          <strong>Paper 2 &amp; Paper 3 Tip:</strong> Notice how every combination pairs balanced contrast (*Por un lado… {PIVOTS[pivot].label}…*) with a present-subjunctive safety recommendation at the end!
+          <strong>Paper 2 &amp; Paper 3 Tip:</strong> Notice how every combination pairs balanced contrast (<em>Por un lado… {PIVOTS[pivot].label}…</em>) with a present-subjunctive safety recommendation at the end!
         </div>
       }
     >

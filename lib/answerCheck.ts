@@ -468,9 +468,33 @@ const CLITICS = new Set(["no", "nunca", "ya", "me", "te", "se", "nos", "os", "lo
 const THIRD_SG_O_PRET = new Set(["hizo", "quiso", "vino", "pudo", "supo", "puso", "tuvo", "estuvo", "dijo", "trajo", "condujo", "produjo", "tradujo", "redujo", "dio", "vio"]);
 const ONLY_THIRD_SG = new Set(["es", "está", "va", "da", "ha", "hay", "fue", ...THIRD_SG_O_PRET]);
 
+const BARE_SUBJECT_MAP: Record<string, string> = {
+  yo: "yo",
+  tu: "tú",
+  el: "él",
+  ella: "ella",
+  usted: "usted",
+  nosotros: "nosotros",
+  nosotras: "nosotras",
+  vosotros: "vosotros",
+  vosotras: "vosotras",
+  ellos: "ellos",
+  ellas: "ellas",
+  ustedes: "ustedes",
+};
+
 function stripLeadingSubject(s: string): { pronoun: string; rest: string } | null {
   for (const p of OPT_SUBJECTS) {
     if (s.startsWith(p + " ")) return { pronoun: p, rest: s.slice(p.length + 1).trim() };
+  }
+  return null;
+}
+
+function stripLeadingSubjectBare(bare: string): { pronoun: string; rawPronoun: string; rest: string } | null {
+  for (const [raw, canonical] of Object.entries(BARE_SUBJECT_MAP)) {
+    if (bare.startsWith(raw + " ")) {
+      return { pronoun: canonical, rawPronoun: raw, rest: bare.slice(raw.length + 1).trim() };
+    }
   }
   return null;
 }
@@ -573,7 +597,16 @@ function checkText(spec: Extract<AnswerSpec, { type: "text" }>, input: string): 
 
   // 4. Accent-only difference → "close" nudge (NEVER marked correct, because hablo ≠ habló in Paper 2 Q3c!)
   const bare = stripAccents(n);
-  if (accNorms.some((a) => stripAccents(a) === bare)) {
+  const subBare = stripLeadingSubjectBare(bare);
+  const accentMatch =
+    accNorms.some((a) => stripAccents(a) === bare) ||
+    (subBare !== null &&
+      accNorms.some((a) => {
+        if (stripAccents(a) !== subBare.rest) return false;
+        if (subBare.rawPronoun === "el" && !n.startsWith("él ") && !/[áéíóúñü]/.test(a)) return false;
+        return isPersonCompatible(subBare.pronoun, a);
+      }));
+  if (accentMatch) {
     return {
       status: "close",
       feedback: "So close — the letters are right, but check your accents (á é í ó ú ñ ü). In Edexcel Paper 2, an accent can change the tense or meaning (e.g. *hablo* vs *habló*).",

@@ -43,7 +43,10 @@ function pushStyled(text: string, out: ReactNode[]) {
         flush();
         bold = !bold;
         i++;
-      } else buf += "**", i++;
+      } else {
+        buf += "**";
+        i++;
+      }
     } else if (c === "*") {
       const opening = !italic;
       const canOpen = !isSpace(text[i + 1]) && /\*/.test(text.slice(i + 1).replace(/\*\*/g, ""));
@@ -110,7 +113,14 @@ export function renderBlocks(text: string): ReactNode[] {
     let i = 0;
     while (i < lines.length) {
       const line = lines[i];
-      if (/^\s*\|/.test(line)) {
+      if (/^\s*#{1,4}\s+/.test(line)) {
+        out.push(
+          <h4 key={k()} className="rich-h3">
+            {renderInline(line.replace(/^\s*#{1,4}\s+/, ""))}
+          </h4>,
+        );
+        i++;
+      } else if (/^\s*\|/.test(line)) {
         const tbl: string[] = [];
         while (i < lines.length && /^\s*\|/.test(lines[i])) tbl.push(lines[i++]);
         out.push(renderTable(tbl, k()));
@@ -134,6 +144,7 @@ export function renderBlocks(text: string): ReactNode[] {
         const p: string[] = [];
         while (
           i < lines.length &&
+          !/^\s*#{1,4}\s+/.test(lines[i]) &&
           !/^\s*\|/.test(lines[i]) &&
           !/^\s*[-•]\s+/.test(lines[i]) &&
           !/^\s*\d+[.)]\s+/.test(lines[i]) &&

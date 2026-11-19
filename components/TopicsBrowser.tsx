@@ -146,7 +146,7 @@ export function TopicsBrowser({ summaries }: { summaries: TopicSummary[] }) {
             autoComplete="off"
             spellCheck={false}
             className="input pl-10 pr-12"
-            placeholder="Search, e.g. “percentages” or “bearings”"
+            placeholder="Search, e.g. “subjunctive”, “preterite” or “holidays”"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -162,7 +162,7 @@ export function TopicsBrowser({ summaries }: { summaries: TopicSummary[] }) {
           </span>
         </div>
 
-        <div role="group" aria-label="Filter by strand" className="nav-scroll -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+        <div role="group" aria-label="Filter by strand" className="flex flex-wrap gap-2 pb-1">
           {chips.map((s) => {
             const on = strand === s;
             const st = s === ALL ? null : strandStyle(s);

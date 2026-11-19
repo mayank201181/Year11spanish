@@ -56,7 +56,7 @@ function shuffle<T>(arr: T[], seed: number): T[] {
 }
 
 export function VocabTab({ topicId, topicTitle }: { topicId: string; topicTitle: string }) {
-  const groups = VOCAB[topicId] ?? [];
+  const groups = useMemo(() => VOCAB[topicId] ?? [], [topicId]);
   const all = useMemo(() => groups.flatMap((g) => g.items.map((it) => ({ ...it, group: g.title }))), [groups]);
   const [mode, setMode] = useState<Mode>("list");
   const [groupFilter, setGroupFilter] = useState<string>("All");
@@ -277,15 +277,28 @@ function VocabTest({ items, topicId }: { items: (VocabItem & { group: string })[
               <span className="text-sm text-ink-2">Type what you hear (in Spanish).</span>
             </div>
           )}
-          <AnswerInput value={value} onChange={setValue} onSubmit={result ? next : check} type="text" disabled={!!result && result !== "accent"} autoFocus />
+          <AnswerInput value={value} onChange={setValue} onSubmit={result && result !== "accent" ? next : check} type="text" disabled={!!result && result !== "accent"} autoFocus />
           {result ? (
             <div
               role="status"
               aria-live="polite"
               className={`rounded-xl px-3 py-2 text-sm ${result === "right" ? "bg-good-soft" : result === "accent" ? "bg-warn-soft" : "bg-bad-soft"}`}
             >
-              {result === "right" ? <strong>✅ ¡Correcto! </strong> : result === "accent" ? <strong>🟡 Almost — check your accents. </strong> : <strong>Not quite. </strong>}
-              <span lang="es">{card.es}</span> = {card.en}
+              {result === "right" ? (
+                <strong>✅ ¡Correcto! </strong>
+              ) : result === "accent" ? (
+                <strong>🟡 Almost — check your accents (á é í ó ú ñ ü) and press Check again!</strong>
+              ) : (
+                <strong>Not quite. </strong>
+              )}
+              {result !== "accent" ? (
+                <>
+                  <span lang="es" className="font-bold">
+                    {card.es}
+                  </span>{" "}
+                  = {card.en}
+                </>
+              ) : null}
             </div>
           ) : null}
           <div className="flex flex-wrap gap-2">
@@ -294,7 +307,7 @@ function VocabTest({ items, topicId }: { items: (VocabItem & { group: string })[
                 Check
               </button>
             ) : null}
-            {result ? (
+            {result && result !== "accent" ? (
               <button type="button" className="btn btn-secondary" onClick={next}>
                 Next →
               </button>

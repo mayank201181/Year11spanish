@@ -64,18 +64,14 @@ export function PrintButton({ label = "Print", className = "" }: { label?: strin
 // ------------------------------------------------------------------ helpers
 
 const STRAND_DOT: Record<string, string> = {
-  Number: "bg-s-number",
-  "Ratio & Proportion": "bg-s-ratio",
-  Algebra: "bg-s-algebra",
-  "Geometry & Measure": "bg-s-geometry",
-  "Statistics & Probability": "bg-s-stats",
+  "Home, Study & Work": "bg-s-number",
+  "People, World & Health": "bg-s-ratio",
+  "IGCSE Grammar Mastery": "bg-s-algebra",
 };
 const STRAND_TEXT: Record<string, string> = {
-  Number: "text-s-number",
-  "Ratio & Proportion": "text-s-ratio",
-  Algebra: "text-s-algebra",
-  "Geometry & Measure": "text-s-geometry",
-  "Statistics & Probability": "text-s-stats",
+  "Home, Study & Work": "text-s-number",
+  "People, World & Health": "text-s-ratio",
+  "IGCSE Grammar Mastery": "text-s-algebra",
 };
 
 interface Row {

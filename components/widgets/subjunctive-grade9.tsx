@@ -124,12 +124,12 @@ const VERB_CHOICES: Record<VerbKey, { en: string; tail: string; ruleNote: string
   },
 };
 
-const SUBJECTS: { value: Person; es: string; pluralAdj: boolean }[] = [
-  { value: "yo", es: "yo", pluralAdj: false },
-  { value: "tú", es: "tú", pluralAdj: false },
-  { value: "él", es: "mi hermana", pluralAdj: false },
-  { value: "nosotros", es: "nosotros", pluralAdj: true },
-  { value: "ellos", es: "los jóvenes", pluralAdj: true },
+const SUBJECTS: { value: Person; es: string; en: string; pluralAdj: boolean }[] = [
+  { value: "yo", es: "yo", en: "I", pluralAdj: false },
+  { value: "tú", es: "tú", en: "you", pluralAdj: false },
+  { value: "él", es: "mi hermana", en: "my sister", pluralAdj: false },
+  { value: "nosotros", es: "nosotros", en: "we", pluralAdj: true },
+  { value: "ellos", es: "los jóvenes", en: "young people", pluralAdj: true },
 ];
 
 function SubjunctiveWorkbench() {
@@ -225,8 +225,8 @@ function SubjunctiveWorkbench() {
             </span>
           </p>
           <p className="mt-1 text-sm text-ink-2">
-            Meaning: “{trig.en} {subj.es === "mi hermana" ? "my sister" : subj.es === "los jóvenes" ? "young people" : subj.es} — {vMeta.en}
-            {triggerKey === "cuando-fut" ? ", everything will turn out well." : ".”"}
+            Meaning: “{trig.en} {subj.en} — {vMeta.en}
+            {triggerKey === "cuando-fut" ? ", everything will turn out well.”" : ".”"}
           </p>
         </div>
       </div>

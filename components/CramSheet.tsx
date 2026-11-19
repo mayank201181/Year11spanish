@@ -303,6 +303,14 @@ export function CramSheet({
 
       {/* Per-Topic Cram Cards */}
       <div className="space-y-8">
+        {visiblePacks.length === 0 ? (
+          <div className="card space-y-2 p-6 text-center">
+            <p className="font-bold">No cram cards match &ldquo;{query}&rdquo;.</p>
+            <button type="button" onClick={() => setQuery("")} className="btn btn-secondary btn-sm">
+              Clear search
+            </button>
+          </div>
+        ) : null}
         {visiblePacks.map((pack) => (
           <article key={pack.id} className="card space-y-6 overflow-hidden p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
@@ -460,11 +468,11 @@ export function CramSheet({
             {(sectionFilter === "all" || sectionFilter === "facts") && pack.keyFacts.length > 0 ? (
               <section className="space-y-2.5">
                 <h3 className="flex items-center gap-2 text-base font-black">
-                  <span aria-hidden>📖</span> Must-Memorise Definitions &amp; Formulas
+                  <span aria-hidden>📖</span> Must-Memorise Grammar Rules, Triggers &amp; Grade-9 Phrases
                 </h3>
                 <div className="grid gap-2.5 sm:grid-cols-2">
                   {pack.keyFacts.map((f, i) => (
-                    <div key={i} className="rounded-xl border border-line bg-surface p-3 text-sm">
+                    <div key={i} className="print-avoid-break rounded-xl border border-line bg-surface p-3 text-sm">
                       <div className="text-xs font-extrabold text-brand">
                         <RichInline text={f.name} />
                       </div>

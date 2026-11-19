@@ -608,7 +608,7 @@ export const guide: TopicGuide = {
       },
       {
         name: "Future & Conditional Shared Stems",
-        formula: "(Infinitive or **tendr-/pondr-/saldr-/vendr-/podr-/sabr-/habr-/querr-/valdr-/cabr-/har-/dir-**) + **-é/-ás/-á/-emos/-éis/-án** or **-ía…**",
+        formula: "(Infinitive or **tendr- / pondr- / saldr- / vendr- / podr- / sabr- / habr- / querr- / valdr- / cabr- / har- / dir-**) + **-é / -ás / -á / -emos / -éis / -án** or **-ía…**",
         note: "All Future forms carry an accent EXCEPT *nosotros* (*tendremos*).",
       },
     ],

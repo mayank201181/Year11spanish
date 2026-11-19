@@ -215,9 +215,11 @@ body {
 }
 
 /* ------------------------- rich text & maths ---------------------------- */
-.rich { line-height: 1.7; }
+.rich { line-height: 1.7; overflow-wrap: anywhere; }
 .rich > * + * { margin-top: 0.7rem; }
 .rich strong { font-weight: 800; }
+.rich-h3 { font-size: 1.02rem; font-weight: 800; color: var(--ink); margin-top: 1rem; }
+.rich > .rich-h3:first-child { margin-top: 0; }
 .rich code {
   background: var(--surface-2);
   border: 1px solid var(--line);
@@ -299,5 +301,8 @@ input[type="range"] { accent-color: var(--brand); width: 100%; }
 
 @media print {
   .no-print { display: none !important; }
-  body { background: #fff; }
+  body { background: #fff; color: #000; }
+  main { padding-bottom: 0 !important; }
+  .card { box-shadow: none !important; }
+  .print-avoid-break { break-inside: avoid; }
 }

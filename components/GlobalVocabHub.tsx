@@ -488,7 +488,7 @@ function GlobalVocabTest({ items, filterKey }: { items: EnrichedVocab[]; filterK
                 Check
               </button>
             ) : null}
-            {result ? (
+            {result && result !== "accent" ? (
               <button type="button" className="btn btn-secondary" onClick={next}>
                 Next →
               </button>

@@ -629,7 +629,7 @@ export function SprintRunner() {
           How it works
         </h2>
         <ul className="rich-ul mt-2 space-y-1 text-ink-2">
-          <li>Type your answer and press Enter — the next one appears straight away. Use the − button for negatives.</li>
+          <li>Type your answer and press Enter — the next one appears straight away. Use the on-screen accent keys (á é í ó ú ñ ü ¿ ¡) for Spanish accents.</li>
           <li>Missed one? Keep going. It comes back a few questions later, and you&apos;ll see every fact to revisit at the end.</li>
           <li>Earn 1 ⭐ for every 5 correct, up to 5 ⭐ for each type of sprint per day.</li>
           <li>Personal bests are for timed sprints. Untimed practice is just as valuable — calm, accurate recall is what makes you fast.</li>

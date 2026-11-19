@@ -74,7 +74,7 @@ export function SiteHeader() {
             <Link
               key={n.href}
               href={n.href}
-              className={`rounded-lg px-2.5 py-1.5 text-xs font-bold xl:text-sm ${active(path, n.href) ? "bg-brand-soft text-brand" : "text-ink-2 hover:bg-surface-2"}`}
+              className={`whitespace-nowrap rounded-lg px-2 py-1.5 text-xs font-bold xl:px-2.5 xl:text-sm ${active(path, n.href) ? "bg-brand-soft text-brand" : "text-ink-2 hover:bg-surface-2"}`}
             >
               {n.label}
             </Link>
@@ -187,7 +187,7 @@ export function MobileNav() {
           <Link
             key={n.href}
             href={n.href}
-            className={`flex flex-col items-center gap-0.5 py-2 text-[0.62rem] font-bold transition-colors sm:text-xs ${
+            className={`flex flex-col items-center gap-0.5 whitespace-nowrap px-0.5 py-2 text-[0.58rem] font-bold transition-colors sm:text-xs ${
               active(path, n.href) ? "text-brand" : "text-ink-2 hover:text-ink"
             }`}
             aria-current={active(path, n.href) ? "page" : undefined}

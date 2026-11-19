@@ -89,7 +89,7 @@ export function DrillItemCard({
           {msg ? (
             <div className={`animate-pop mt-3 rounded-xl px-3 py-2 text-sm ${msg.status === "incorrect" ? "animate-shake bg-bad-soft" : msg.status === "close" ? "bg-warn-soft" : "bg-info-soft"}`} role="status" aria-live="polite">
               {msg.status === "incorrect" ? <strong>Not quite. </strong> : msg.status === "close" ? <strong>Almost! </strong> : null}
-              {msg.text ?? (msg.status === "incorrect" ? "Check your working and try once more." : null)}
+              {msg.text ? <RichInline text={msg.text} /> : msg.status === "incorrect" ? "Check your working and try once more." : null}
             </div>
           ) : null}
           {hinted && item.hint ? (
@@ -118,7 +118,11 @@ export function DrillItemCard({
         <div className={`animate-pop mt-4 rounded-xl border-l-4 p-4 ${done.correct ? "border-good bg-good-soft" : "border-bad bg-bad-soft"}`} role="status" aria-live="polite">
           <div className="font-extrabold">{done.correct ? (done.tries === 1 && !done.hinted ? "✅ Correct — clean solve!" : "✅ Correct") : "Not this time"}</div>
           {/* Only specific feedback on the last wrong answer (a trap or checker hint) — never a "try again" prompt. */}
-          {!done.correct && msg?.status === "incorrect" && msg.text ? <p className="mt-1 font-semibold">{msg.text}</p> : null}
+          {!done.correct && msg?.status === "incorrect" && msg.text ? (
+            <p className="mt-1 font-semibold">
+              <RichInline text={msg.text} />
+            </p>
+          ) : null}
           <p className="mt-2">
             <strong>Answer: </strong>
             <RichInline text={displayAnswer(item.answer)} />

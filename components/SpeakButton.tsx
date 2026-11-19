@@ -1,8 +1,11 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { speakSpanish, speechAvailable } from "@/lib/speech";
+import { speakSpanish, speechAvailable, warmSpanishVoices } from "@/lib/speech";
 
-const subscribe = () => () => {};
+const subscribe = () => {
+  warmSpanishVoices();
+  return () => {};
+};
 
 export function SpeakButton({
   text,

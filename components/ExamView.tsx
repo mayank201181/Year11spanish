@@ -65,24 +65,24 @@ function topicCount(paper: ExamPaper): number {
 
 const TIPS = [
   {
-    icon: "✏️",
-    title: "Show your working on paper",
-    text: "Keep scrap paper and a pencil beside you. Writing each step makes slips easy to spot — and in a real exam, method earns marks even when the final answer is wrong.",
+    icon: "🎯",
+    title: "Watch written accents (á é í ó ú ñ ü)",
+    text: "In Edexcel 4SP0 Paper 2 Q3c and Q7, a missing accent can change the tense or meaning (hablo vs habló, esta vs está). Use the on-screen accent keys every time.",
   },
   {
-    icon: "📏",
-    title: "Check units and rounding",
-    text: "Before you type, re-read the question: cm or cm²? To 1 decimal place or 3 significant figures? A fraction or a decimal?",
+    icon: "⏳",
+    title: "Hit all 3 time frames + a Grade-9 trigger",
+    text: "Combine Past (Preterite + Imperfect), Present, and Future/Conditional — and weave in at least one WEIRDO subjunctive trigger (para que, ojalá que, cuando + future).",
   },
   {
     icon: "⏭️",
     title: "Skip and come back",
-    text: "Stuck for more than a couple of minutes? Jump ahead with the numbered buttons and return later with fresh eyes. Easy marks first.",
+    text: "Stuck on a reading inference or verb gap-fill? Jump ahead with the numbered buttons and return later with fresh eyes — secure the straightforward marks first.",
   },
   {
     icon: "🔍",
-    title: "Estimate, then check",
-    text: "A quick estimate tells you whether an answer is sensible. Leave five minutes at the end to look back over everything.",
+    title: "Proofread agreement & false friends",
+    text: "Leave five minutes at the end to verify noun-adjective gender/number (-o/-a/-os/-as), ser vs estar, por vs para, and traps like actualmente ('currently') or éxito ('success').",
   },
 ];
 

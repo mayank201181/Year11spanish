@@ -166,6 +166,14 @@ test("text (Spanish): case, punctuation and accents", () => {
   assert.equal(st({ type: "text", accept: ["hablo"] }, "habló"), "close");
   assert.equal(st({ type: "text", accept: ["habló"] }, "Habló."), "correct");
   assert.equal(st({ type: "text", accept: ["el año"] }, "el ano"), "close");
+  // optional subject pronoun + accent slip → "close" ONLY when person-compatible, never "correct"
+  assert.equal(st({ type: "text", accept: ["hablé"] }, "yo hablé"), "correct");
+  assert.equal(st({ type: "text", accept: ["hablé"] }, "yo hable"), "close");
+  assert.equal(st({ type: "text", accept: ["hablas"] }, "tu hablas"), "close");
+  assert.equal(st({ type: "text", accept: ["habló"] }, "el hablo"), "close");
+  assert.equal(st({ type: "text", accept: ["habló"] }, "él hablo"), "close");
+  assert.equal(st({ type: "text", accept: ["habló"] }, "yo hablo"), "incorrect");
+  assert.equal(st({ type: "text", accept: ["casa"] }, "el casa"), "incorrect");
   // adversarial opposites / confusable pairs are never marked correct
   assert.ok(ANTONYM_PAIRS.length >= 20);
   assert.ok(CONFUSABLE_GROUPS.length >= 8);

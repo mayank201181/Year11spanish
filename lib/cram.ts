@@ -79,7 +79,7 @@ export function buildTopicCramPack(topic: Topic): TopicCramPack {
     examMistakes: L.examMistakes ?? [],
     misconceptions: L.misconceptions ?? [],
     mnemonics: L.mnemonics ?? [],
-    keyFacts: keyFacts.slice(0, 12),
+    keyFacts,
     questionTraps,
   };
 }

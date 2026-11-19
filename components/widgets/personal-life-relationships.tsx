@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { RichInline } from "@/components/Rich";
 import { Readout, Segmented, WidgetFrame, type WidgetDef } from "./kit";
 import { speakSpanish, speechAvailable } from "@/lib/speech";
 import { conjugate, type Person } from "@/lib/spanish/verbs";
@@ -264,10 +265,10 @@ function RelationshipWorkbench() {
       caption={
         <div className="space-y-1">
           <div>
-            <strong>Active Grammar Guard:</strong> {target.collectiveTrap ?? trait.tip}
+            <strong>Active Grammar Guard:</strong> <RichInline text={target.collectiveTrap ?? trait.tip} />
           </div>
           <div className="text-ink-2">
-            Preposition rule: {prepRule.replace(/\*\*/g, "").replace(/\*/g, "")} · Adjective rule: {trait.tip.replace(/\*\*/g, "").replace(/\*/g, "")}
+            Preposition rule: <RichInline text={prepRule} /> · Adjective rule: <RichInline text={trait.tip} />
           </div>
         </div>
       }
@@ -364,7 +365,7 @@ function RelationshipWorkbench() {
           <p className="mt-1 text-sm italic text-ink-2">“{sentenceEn}”</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <Readout label="Verb Form" value={verbChunk} tone="brand" />
           <Readout label="Prep / Personal a" value={prepChunk} tone="good" />
           <Readout label="Agreed Clause" value={`${serClauseVerb} ${agreedAdj}`} tone="ink" />
@@ -601,7 +602,7 @@ function ChildhoodContrastBuilder() {
           <p className="mt-1 text-sm italic text-ink-2">“{fullEn}”</p>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <Readout label="Past Imperfect" value={pastVerb} tone="brand" />
           <Readout label="Contrast Connector" value={bridge.es} tone="ink" />
           <Readout label="Q7 Rubric Score" value={bandFeatures} tone="good" />

@@ -373,7 +373,7 @@ function ShortBody({ q, mode, restored, onDone, onAnswer, topicId, onNext, nextL
               aria-live="polite"
             >
               {msg.status === "incorrect" ? <strong>Not quite. </strong> : msg.status === "close" ? <strong>Almost! </strong> : null}
-              {msg.text ?? (msg.status === "incorrect" ? "Check your working and have another go — or take a hint." : null)}
+              {msg.text ? <RichInline text={msg.text} /> : msg.status === "incorrect" ? "Check your working and have another go — or take a hint." : null}
               {msg.status === "incorrect" && tries < MAX_TRIES ? <span className="block text-ink-2">You have one more try.</span> : null}
             </div>
           ) : null}
@@ -393,7 +393,11 @@ function ShortBody({ q, mode, restored, onDone, onAnswer, topicId, onNext, nextL
       {!exam && done ? (
         <Verdict status={done.correct ? "correct" : "incorrect"}>
           {/* Only specific feedback on the last wrong answer (a trap or checker hint) — never a "try again" prompt. */}
-          {!done.correct && msg?.status === "incorrect" && msg.text ? <p className="font-semibold">{msg.text}</p> : null}
+          {!done.correct && msg?.status === "incorrect" && msg.text ? (
+            <p className="font-semibold">
+              <RichInline text={msg.text} />
+            </p>
+          ) : null}
           <p>
             <span className="font-bold">Answer: </span>
             <RichInline text={displayAnswer(q.answer)} />

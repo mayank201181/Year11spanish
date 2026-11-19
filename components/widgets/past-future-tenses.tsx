@@ -430,7 +430,7 @@ function PreteriteImperfectTimelineWidget() {
           />
         ) : null}
 
-        <div className="overflow-hidden rounded-xl border border-line bg-surface p-2">
+        <div className="overflow-hidden rounded-xl border border-line bg-[#f8fafc] p-2">
           <svg
             viewBox="0 0 620 155"
             xmlns="http://www.w3.org/2000/svg"
@@ -438,6 +438,7 @@ function PreteriteImperfectTimelineWidget() {
             aria-label={`Timeline visualising ${mode} aspect for ${scene.title}`}
             className="w-full"
           >
+            <rect x="0" y="0" width="620" height="155" rx="10" fill="#f8fafc" />
             <line x1="36" y1="108" x2="584" y2="108" stroke="#64748b" strokeWidth="2" />
             <polygon points="584,108 574,103 574,113" fill="#64748b" />
             <text x="580" y="132" textAnchor="end" fontSize="11" fill="#64748b">

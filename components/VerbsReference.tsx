@@ -121,13 +121,13 @@ export function VerbsReference() {
                     type="button"
                     onClick={() => setSelectedInf(v.inf)}
                     className={`flex w-full items-baseline justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-sm ${
-                      on ? "bg-brand text-white font-extrabold" : "hover:bg-surface-2"
+                      on ? "bg-brand text-brand-ink font-extrabold" : "hover:bg-surface-2"
                     }`}
                   >
                     <span lang="es" className="font-bold">
                       {v.inf}
                     </span>
-                    <span className={`truncate text-xs ${on ? "text-white/90" : "text-ink-2"}`}>{v.en}</span>
+                    <span className={`truncate text-xs ${on ? "text-brand-ink/80" : "text-ink-2"}`}>{v.en}</span>
                   </button>
                 </li>
               );

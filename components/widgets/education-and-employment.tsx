@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
+import { RichInline } from "@/components/Rich";
 import {
   Readout,
   Segmented,
@@ -489,7 +490,7 @@ function InterviewUpgrader() {
       ]}
       caption={
         <span>
-          <strong>Mark-Saver Active:</strong> {current.pitfallAvoided}
+          <strong>Mark-Saver Active:</strong> <RichInline text={current.pitfallAvoided} />
         </span>
       }
     >

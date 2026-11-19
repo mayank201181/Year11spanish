@@ -250,7 +250,7 @@ function PostcardBuilder() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <Readout label="Time Frames" value="3 / 3 ✅" tone="good" />
           <Readout label="Words" value={`${wordCount} w`} tone="brand" />
           <Readout label="Paper 2 Band" value={futMode === "si" ? "Band 5 (Gr 9)" : "Band 4–5"} tone="good" />
