@@ -63,8 +63,8 @@ async def main():
                 [FFMPEG, "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps),
                  "-c:v", "mjpeg", "-i", "-",
                  "-vf", "scale=in_range=full:out_range=tv,format=yuv420p",
-                 "-c:v", "libx264", "-preset", "ultrafast",
-                 "-crf", "26", "-pix_fmt", "yuv420p", "-color_range", "tv", "-tune", "animation", seg_path],
+                 "-c:v", "libx264", "-threads", "2", "-preset", "fast",
+                 "-crf", "25", "-pix_fmt", "yuv420p", "-color_range", "tv", "-tune", "animation", seg_path],
                 stdin=subprocess.PIPE
             )
             for i in range(a, b, 24):

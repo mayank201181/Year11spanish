@@ -131,8 +131,8 @@ def lint(path):
                 try:
                     root = ET.fromstring(b["diagram"])
                     vb = root.get("viewBox", "")
-                    if not root.tag.endswith("svg") or not vb.startswith("0 0 520 "): errs.append(f"{where}: diagram must be <svg viewBox=\"0 0 520 H\">")
-                    elif not (120 <= float(vb.split()[3]) <= 280): errs.append(f"{where}: diagram height must be 120..280")
+                    if not root.tag.endswith("svg") or not (vb.startswith("0 0 520 ") or vb.startswith("0 0 600 ")): errs.append(f"{where}: diagram must be <svg viewBox=\"0 0 600 H\"> (or 520)")
+                    elif not (120 <= float(vb.split()[3]) <= 300): errs.append(f"{where}: diagram height must be 120..300")
                     if "xmlns" not in b["diagram"]: errs.append(f"{where}: diagram needs xmlns=\"http://www.w3.org/2000/svg\"")
                     if re.search(r"(href=|<image|<script|url\()", b["diagram"]): errs.append(f"{where}: no external refs/images/scripts in diagram")
                 except ET.ParseError as e:

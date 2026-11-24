@@ -30,7 +30,7 @@ for T in "$@"; do
   echo "=== $T: encode"
   "$FFMPEG" -y -loglevel error -f concat -safe 0 -i "out/$T/parts.txt" -i "out/$T/audio.wav" \
     -c:v copy \
-    -af "loudnorm=I=-16:TP=-1.5:LRA=11" -ar 48000 -c:a aac -b:a 128k -movflags +faststart -shortest \
+    -af "loudnorm=I=-16:TP=-2.0:LRA=11,alimiter=limit=0.72:attack=0.1:release=50:level=false" -ar 48000 -c:a aac -b:a 128k -movflags +faststart -shortest \
     "$MP4"
   "$PY" render_py.py "out/$T" --poster "$JPG"
   rm -f out/$T/part*.mp4

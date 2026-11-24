@@ -72,7 +72,7 @@ export const SITCOM_EPISODES: SitcomEpisode[] = [
     "topicShort": "IGCSE Tense Mastery",
     "title": "Tres Tiempos, Un Desastre",
     "logline": "Vani builds the ultimate Paper Two 150-word timeline machine while Dad drops accents that accidentally change time travel. Preterite vs Imperfect, Perfect & Pluperfect, Simple Future & Conditional, and Grade-9 verbal idioms.",
-    "durationSec": 296,
+    "durationSec": 295,
     "src": "/videos/past-future-tenses.mp4",
     "poster": "/videos/posters/past-future-tenses.jpg"
   },

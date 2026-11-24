@@ -318,13 +318,13 @@ function setKitchen(t) {
 }
 function setMall(t) {
   const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#fff1f2'); g.addColorStop(1, '#ffe4e6'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  // storefront
-  ctx.fillStyle = '#7e22ce'; ctx.fillRect(80, 30, 1120, 110);
-  text('★ CENTRO COMERCIAL ★', 640, 86, 58, '#fde047', { stroke: '#4c1d95', sw: 8 });
+  // storefront (fits completely in y=8..76 so wide shots show it cleanly and zoomed shots frame below it without clipping)
+  ctx.fillStyle = '#7e22ce'; ctx.fillRect(80, 8, 1120, 68);
+  text('★ CENTRO COMERCIAL ★', 640, 42, 42, '#fde047', { stroke: '#4c1d95', sw: 6 });
   // banners
   const sw = Math.sin(t * 2) * 0.03;
-  ctx.save(); ctx.translate(320, 150); ctx.rotate(-0.05 + sw); ctx.fillStyle = '#dc2626'; rr(-170, 0, 340, 120, 12); ctx.fill(); text('CINE', 0, 42, 52, '#fff'); text('HOY: 2 x 1', 0, 92, 26, '#fde047'); ctx.restore();
-  ctx.save(); ctx.translate(960, 150); ctx.rotate(0.05 - sw); ctx.fillStyle = '#f97316'; rr(-190, 0, 380, 120, 12); ctx.fill(); text('¡REBAJAS!', 0, 42, 44, '#fff'); text('videojuegos · libros · música', 0, 92, 22, '#fff7ed'); ctx.restore();
+  ctx.save(); ctx.translate(290, 178); ctx.rotate(-0.04 + sw); ctx.fillStyle = '#dc2626'; rr(-155, 0, 310, 108, 12); ctx.fill(); text('CINE', 0, 36, 44, '#fff'); text('HOY: 2 x 1', 0, 82, 24, '#fde047'); ctx.restore();
+  ctx.save(); ctx.translate(990, 178); ctx.rotate(0.04 - sw); ctx.fillStyle = '#f97316'; rr(-175, 0, 350, 108, 12); ctx.fill(); text('¡REBAJAS!', 0, 36, 42, '#fff'); text('videojuegos · libros · música', 0, 82, 20, '#fff7ed'); ctx.restore();
   // shelves of cushions
   for (let s = 0; s < 2; s++) { const sx = s ? 900 : 60; ctx.fillStyle = '#d6d3d1'; ctx.fillRect(sx, 330, 320, 12); ctx.fillRect(sx, 430, 320, 12);
     for (let i = 0; i < 5; i++) { cushion(sx + 35 + i * 62, 300, 60, 52, CUSH[(i + s * 5) % 14], 0); cushion(sx + 35 + i * 62, 400, 60, 52, CUSH[(i + s * 5 + 3) % 14], 0); } }
@@ -522,33 +522,60 @@ function drawRich(s, x, y, size, color, opts = {}) { // single line, shrinks to 
 const SVG_IMG = new Map();
 function drawBoard(entries, t, side) {
   const all = entries.filter(l => t >= l.t); if (!all.length) return;
-  const vis = all.filter(l => l.text !== undefined); const dg = all.filter(l => l.svg).pop();
-  const img = dg ? SVG_IMG.get(dg.svg) : null; const dh = img ? Math.min(280, img.height * 520 / img.width) : 0;
-  const w = 560, lh = 50, h = 60 + vis.length * lh + (img ? dh + 18 : 0) + 14, x = side === 'left' ? 30 : W - w - 30, y = 36;
+  const visAll = all.filter(l => l.text !== undefined); const dg = all.filter(l => l.svg).pop();
+  const img = dg ? SVG_IMG.get(dg.svg) : null;
+  const w = 640, imgW = w - 40, dh = img ? Math.min(270, img.height * imgW / img.width) : 0;
+  // Never shrink readable board text below 28px at 720p; wrap long lines cleanly onto 2 rows.
+  const rows = [];
+  for (let idx = 0; idx < visAll.length; idx++) {
+    const l = visAll[idx];
+    const xi = l.text.indexOf('✘'), ci = l.text.indexOf('✔');
+    if (xi >= 0 && ci > xi) {
+      const a = l.text.slice(0, ci), b = l.text.slice(ci);
+      let sz = 32; setFont(sz, 'Hand', 400);
+      while (lineW(richWords(l.text)) > w - 44 && sz > 28) { sz--; setFont(sz, 'Hand', 400); }
+      if (lineW(richWords(l.text)) <= w - 44) {
+        rows.push({ kind: 'split', a, b, sz, t: l.t, isLast: idx === visAll.length - 1 });
+      } else {
+        rows.push({ kind: 'line', words: richWords(a.trim()), sz: 28, col: '#fca5a5', esCol: '#fca5a5', t: l.t, isLast: idx === visAll.length - 1 });
+        rows.push({ kind: 'line', words: richWords(b.trim()), sz: 28, col: '#86efac', t: l.t, isLast: idx === visAll.length - 1 });
+      }
+    } else {
+      const col = /✔/.test(l.text) ? '#86efac' : /✘|\?\?\?|NOT/.test(l.text) ? '#fca5a5' : '#f8fafc';
+      let sz = 32; setFont(sz, 'Hand', 400);
+      while (lineW(richWords(l.text)) > w - 44 && sz > 28) { sz--; setFont(sz, 'Hand', 400); }
+      const wrapped = lineW(richWords(l.text)) <= w - 44 ? [richWords(l.text)] : richWrap(l.text, w - 44, 28, 'Hand', 400);
+      for (const wl of wrapped) rows.push({ kind: 'line', words: wl, sz: wrapped.length > 1 ? 28 : sz, col, t: l.t, isLast: idx === visAll.length - 1 });
+    }
+  }
+  const lh = 42, headerH = 54, maxBoardH = 532;
+  const maxRows = Math.max(1, Math.floor((maxBoardH - headerH - (img ? dh + 18 : 0) - 14) / lh));
+  const shown = rows.slice(-maxRows);
+  const h = headerH + shown.length * lh + (img ? dh + 18 : 0) + 14;
+  const x = side === 'left' ? 28 : W - w - 28, y = 20;
   const k = ease((t - all[0].t) / 0.35);
   ctx.save(); ctx.globalAlpha = k; ctx.translate(0, (1 - k) * -20);
   ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 20;
-  ctx.fillStyle = 'rgba(20,40,32,0.93)'; rr(x, y, w, h, 18); ctx.fill(); ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(20,40,32,0.95)'; rr(x, y, w, h, 18); ctx.fill(); ctx.shadowBlur = 0;
   ctx.strokeStyle = '#4ade80'; ctx.lineWidth = 4; rr(x, y, w, h, 18); ctx.stroke();
-  text('LA PIZARRA DE LOLA', x + 22, y + 26, 17, '#86efac', { align: 'left', weight: 700 });
-  for (let i = 0; i < 9; i++) { circ(x + w - 30 - i * 16, y + 26, 4); fillC(i % 3 === 1 ? '#facc15' : '#ef4444'); }
-  vis.forEach((l, i) => {
-    const kk = clamp((t - l.t) / 0.7, 0, 1);
-    const isNew = t - l.t < 1.6 && i === vis.length - 1;
-    ctx.save(); rr(x + 10, y + 50 + i * lh, (w - 20) * kk, lh, 6); ctx.clip();
-    if (isNew) { ctx.fillStyle = 'rgba(250,204,21,0.12)'; ctx.fillRect(x + 10, y + 50 + i * lh, w - 20, lh); }
-    const col = /✔/.test(l.text) ? '#86efac' : /✘|\?\?\?|NOT/.test(l.text) ? '#fca5a5' : '#f8fafc';
-    const xi = l.text.indexOf('✘'), ci = l.text.indexOf('✔');
-    if (xi >= 0 && ci > xi) { // split: red mistake, then green correction (same font size for both halves)
-      const a = l.text.slice(0, ci), b = l.text.slice(ci); let sz = 34; setFont(sz, 'Hand', 400);
-      while (lineW(richWords(l.text)) > w - 44 && sz > 20) { sz--; setFont(sz, 'Hand', 400); }
-      drawRich(a, x + 22, y + 75 + i * lh, sz, '#fca5a5', { align: 'left', font: 'Hand', weight: 400, esColor: '#fca5a5' });
-      setFont(sz, 'Hand', 400); const aw = lineW(richWords(a)) + ctx.measureText(' ').width;
-      drawRich(b, x + 22 + aw, y + 75 + i * lh, sz, '#86efac', { align: 'left', font: 'Hand', weight: 400 });
-    } else drawRich(l.text, x + 22, y + 75 + i * lh, 34, col, { align: 'left', font: 'Hand', weight: 400, maxW: w - 44, min: 20 });
+  text('LA PIZARRA DE LOLA', x + 22, y + 30, 28, '#86efac', { align: 'left', weight: 700 });
+  for (let i = 0; i < 6; i++) { circ(x + w - 28 - i * 18, y + 30, 4.5); fillC(i % 3 === 1 ? '#facc15' : '#ef4444'); }
+  shown.forEach((r, i) => {
+    const kk = clamp((t - r.t) / 0.7, 0, 1);
+    const isNew = t - r.t < 1.6 && r.isLast;
+    const ry = y + headerH + i * lh;
+    ctx.save(); rr(x + 10, ry, (w - 20) * kk, lh, 6); ctx.clip();
+    if (isNew) { ctx.fillStyle = 'rgba(250,204,21,0.12)'; ctx.fillRect(x + 10, ry, w - 20, lh); }
+    if (r.kind === 'split') {
+      drawRich(r.a, x + 22, ry + lh / 2 + 2, r.sz, '#fca5a5', { align: 'left', font: 'Hand', weight: 400, esColor: '#fca5a5' });
+      setFont(r.sz, 'Hand', 400); const aw = lineW(richWords(r.a)) + ctx.measureText(' ').width;
+      drawRich(r.b, x + 22 + aw, ry + lh / 2 + 2, r.sz, '#86efac', { align: 'left', font: 'Hand', weight: 400 });
+    } else {
+      drawRichLine(r.words, x + 22, ry + lh / 2 + 2, r.sz, r.col, { align: 'left', font: 'Hand', weight: 400, esColor: r.esCol });
+    }
     ctx.restore();
   });
-  if (img) { ctx.globalAlpha = k * ease((t - dg.t) / 0.5); ctx.drawImage(img, x + 20, y + 56 + vis.length * lh + 8, 520, dh); ctx.globalAlpha = k; }
+  if (img) { ctx.globalAlpha = k * ease((t - dg.t) / 0.5); ctx.drawImage(img, x + 20, y + headerH + shown.length * lh + 8, imgW, dh); ctx.globalAlpha = k; }
   ctx.restore();
 }
 function drawSubs(seg, t) {
@@ -565,8 +592,8 @@ function drawLowerThird(cap, t) {
   const k = ease(t / 0.5), out = ease((t - 4.5) / 0.5); if (t > 5) return;
   const [nm, ...rest] = plain(cap).split(' · ');
   ctx.save(); ctx.translate(lerp(-700, 0, k) - out * 700, 0);
-  ctx.fillStyle = '#fde047'; rr(50, 410, 620, 60, 8); ctx.fill(); text(nm, 72, 441, 34, '#111', { align: 'left' });
-  ctx.fillStyle = '#111827'; rr(50, 470, 620, 44, 8); ctx.fill(); text(rest.join(' · '), 72, 492, 20, '#fff', { align: 'left', weight: 500 });
+  ctx.fillStyle = '#fde047'; rr(40, 444, 560, 56, 8); ctx.fill(); text(nm, 62, 472, 32, '#111', { align: 'left' });
+  ctx.fillStyle = '#111827'; rr(40, 500, 560, 42, 8); ctx.fill(); text(rest.join(' · '), 62, 521, 22, '#fff', { align: 'left', weight: 500 });
   ctx.restore();
 }
 
@@ -594,13 +621,18 @@ function camera(seg, t) {
   const sp = speakerAt(seg); if (!sp) return { cx: 640, cy: 360, s: 1 };
   const boardOn = seg.board.some(b => t >= b.t);
   const headY = GROUND - headOff(sp.who);
+  if (boardOn) {
+    const s = 1.55;
+    const cx = sp.x + (sp.x < 640 ? 330 : -330) / s;
+    return { cx, cy: headY + (CH[sp.who].parrot ? 90 : 105), s };
+  }
   if (seg.shot === 'wide') return { cx: 640, cy: 360, s: 1 };
   if (seg.shot === 'two') {
     const others = seg.cast.filter(o => o.who !== sp.who).sort((a, b) => Math.abs(a.x - sp.x) - Math.abs(b.x - sp.x));
     const mid = others.length ? (sp.x + others[0].x) / 2 : sp.x; return { cx: mid, cy: 380, s: 1.2 };
   }
-  const s = 1.6; let cx = sp.x; if (boardOn) cx = sp.x + (sp.x < 640 ? 300 : -300) / s;
-  return { cx, cy: headY + (CH[sp.who].parrot ? 90 : 105), s };
+  const s = 1.6;
+  return { cx: sp.x, cy: headY + (CH[sp.who].parrot ? 90 : 105), s };
 }
 function clampCam(c) { const hw = W / 2 / c.s, hh = H / 2 / c.s; c.cx = clamp(c.cx, hw, W - hw); c.cy = clamp(c.cy, hh, H - hh); return c; }
 
@@ -619,10 +651,20 @@ function drawStage(seg, t, opts = {}) {
   drawSet(seg.scene, t);
   const behind = w => w === 'uncle' && seg.scene === 'hawker';
   const order = [...seg.cast].sort((a, b) => behind(a.who) - behind(b.who));
+  const boardVis = seg.board ? seg.board.filter(b => t >= b.t) : [];
+  const boardAlpha = boardVis.length ? ease((t - boardVis[0].t) / 0.35) : 0;
+  const bSide = boardVis.length ? boardSide(seg) : null;
   for (const c of order) {
     if (t < c.appear) continue;
+    let charAlpha = 1;
+    if (boardAlpha > 0 && seg.kind === 'line' && c.who !== seg.who) {
+      const sx = W / 2 + (c.x - cam.cx) * cam.s * (opts.zoom || 1);
+      if (bSide === 'left' ? sx < 760 : sx > 520) charAlpha = 1 - boardAlpha;
+    }
+    if (charAlpha <= 0.01) continue;
     const pk = c.appear > 0 ? clamp((t - c.appear) / 0.45, 0, 1) : 1;
     ctx.save();
+    ctx.globalAlpha *= charAlpha;
     if (pk < 1) { const sc = back(pk); ctx.translate(c.x, GROUND); ctx.scale(sc, sc); ctx.translate(-c.x, -GROUND); }
     drawChar(c.who, c.x, charState(seg, c, t));
     ctx.restore();
