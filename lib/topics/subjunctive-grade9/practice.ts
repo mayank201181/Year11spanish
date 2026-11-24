@@ -960,9 +960,9 @@ export const practice: TopicPractice = {
             "Contrast **ser** vs **estar** with adjectives that shift meaning! What does *Mi primo **está** muy aburrido hoy* mean compared with *Mi primo **es** aburrido*?",
           options: [
             "My cousin feels bored today (temporary state, estar) vs my cousin is a boring person (character trait, ser).",
-            "My cousin is a boring person today vs my cousin feels bored.",
-            "Both sentences mean 'My cousin is a boring person'.",
-            "My cousin is tired today vs my cousin is lazy.",
+            "My cousin is a boring person today (permanent trait, estar) vs my cousin feels bored (temporary mood, ser).",
+            "Both sentences mean 'My cousin is a boring person' because *aburrido* never changes meaning with ser or estar.",
+            "My cousin is physically exhausted today (temporary tiredness, estar) vs my cousin is naturally lazy (ser).",
           ],
           answerIndex: 0,
           hints: [

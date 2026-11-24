@@ -1,10 +1,10 @@
 import "server-only";
-import { put, head, del, BlobNotFoundError, BlobPreconditionFailedError } from "@vercel/blob";
+import { put, head, get, del, BlobNotFoundError, BlobPreconditionFailedError } from "@vercel/blob";
+import { createHmac } from "crypto";
 import { promises as fs } from "fs";
 import path from "path";
 
-// JSON key-value store on Vercel Blob. Keys (unchanged from v1 so existing
-// families keep their data):
+// JSON key-value store on Vercel Blob. Logical keys:
 //   accounts/<id>.json            public account (no secrets)
 //   secrets/<id>.json             password / PIN hashes
 //   names/<slug>.json             family name → account id
@@ -12,20 +12,66 @@ import path from "path";
 //   ratelimit/<scope>-<id>.json   attempt counters and daily allowances
 // Blob URLs are never sent to the browser.
 //
+// Security hardening:
+// - Set BLOB_ACCESS=private when backed by a private Vercel Blob store to use
+//   authenticated reads via get(..., { access: "private", useCache: false })
+//   and private writes via put(..., { access: "private" }).
+// - On public stores, sensitive keys (secrets/, progress/, ratelimit/) are
+//   stored under a keyed per-store prefix (BLOB_KEY_PREFIX or an HMAC-SHA256
+//   derived from BLOB_READ_WRITE_TOKEN / AUTH_SECRET) so paths aren't guessable,
+//   with transparent read fallback to legacy unprefixed keys.
+//
 // For local end-to-end testing only: set LOCAL_BLOB_DIR (ignored in production)
 // to store the same keys as files on disk.
 
-const LOCAL_DIR = process.env.NODE_ENV !== "production" ? process.env.LOCAL_BLOB_DIR : undefined;
+const SENSITIVE_PREFIXES = ["secrets/", "progress/", "ratelimit/"];
 
-const PUT_OPTIONS = { access: "public", addRandomSuffix: false, cacheControlMaxAge: 0, contentType: "application/json" } as const;
+function localDir(): string | undefined {
+  return process.env.NODE_ENV !== "production" ? process.env.LOCAL_BLOB_DIR : undefined;
+}
 
-function localPath(key: string): string {
+function blobAccess(): "public" | "private" {
+  return process.env.BLOB_ACCESS === "private" ? "private" : "public";
+}
+
+function putOptions() {
+  return {
+    access: blobAccess(),
+    addRandomSuffix: false,
+    cacheControlMaxAge: 0,
+    contentType: "application/json",
+  } as const;
+}
+
+function isSensitiveKey(key: string): boolean {
+  return SENSITIVE_PREFIXES.some((p) => key.startsWith(p));
+}
+
+function sensitivePrefix(): string | null {
+  const explicit = process.env.BLOB_KEY_PREFIX?.trim().replace(/^\/+|\/+$/g, "").replace(/\.\.+/g, "");
+  if (explicit) return explicit;
+  const seed = process.env.BLOB_READ_WRITE_TOKEN || process.env.AUTH_SECRET;
+  if (!seed) return null;
+  return createHmac("sha256", seed).update("blob-key-prefix:v1").digest("hex").slice(0, 24);
+}
+
+/** Resolve logical key → primary storage key (and optional legacy key for transparent read fallback). */
+export function resolveBlobKey(key: string): { primary: string; legacy: string | null } {
+  if (localDir() || blobAccess() === "private" || !isSensitiveKey(key)) {
+    return { primary: key, legacy: null };
+  }
+  const prefix = sensitivePrefix();
+  if (!prefix) return { primary: key, legacy: null };
+  return { primary: `p/${prefix}/${key}`, legacy: key };
+}
+
+function localPath(dir: string, key: string): string {
   const safe = key.replace(/\.\.+/g, "").replace(/^\/+/, "");
-  return path.join(LOCAL_DIR as string, safe);
+  return path.join(dir, safe);
 }
 
 export function blobConfigured(): boolean {
-  return !!process.env.BLOB_READ_WRITE_TOKEN || !!LOCAL_DIR;
+  return !!process.env.BLOB_READ_WRITE_TOKEN || !!localDir();
 }
 
 // The library's error classes don't set `name` (it stays "Error") and BlobNotFoundError's
@@ -51,21 +97,35 @@ interface Tagged<T> {
   found: boolean;
   /** The ETag the value was read at (Blob only). */
   etag?: string;
+  /** True when the value was read via legacy unprefixed key fallback. */
+  fromLegacy?: boolean;
 }
 const MISSING = { value: null, found: false } as const;
 
-async function readTagged<T>(key: string): Promise<Tagged<T>> {
-  if (LOCAL_DIR) {
+async function readRaw<T>(storageKey: string): Promise<Tagged<T>> {
+  const dir = localDir();
+  if (dir) {
     try {
-      return { value: JSON.parse(await fs.readFile(localPath(key), "utf8")) as T, found: true };
+      return { value: JSON.parse(await fs.readFile(localPath(dir, storageKey), "utf8")) as T, found: true };
     } catch (e) {
       if ((e as NodeJS.ErrnoException).code === "ENOENT") return MISSING;
       throw e;
     }
   }
+  if (blobAccess() === "private") {
+    try {
+      const res = await get(storageKey, { access: "private", useCache: false });
+      if (!res || res.statusCode !== 200 || !res.stream) return MISSING;
+      const text = await new Response(res.stream).text();
+      return { value: JSON.parse(text) as T, found: true, etag: res.blob.etag };
+    } catch (e) {
+      if (isNotFound(e)) return MISSING;
+      throw e;
+    }
+  }
   let meta: { url: string; etag: string };
   try {
-    meta = await head(key);
+    meta = await head(storageKey);
   } catch (e) {
     if (isNotFound(e)) return MISSING;
     throw e;
@@ -78,13 +138,22 @@ async function readTagged<T>(key: string): Promise<Tagged<T>> {
   return { value: (await res.json()) as T, found: true, etag: meta.etag };
 }
 
+async function readTagged<T>(key: string): Promise<Tagged<T>> {
+  const { primary, legacy } = resolveBlobKey(key);
+  const hit = await readRaw<T>(primary);
+  if (hit.found || !legacy) return hit;
+  const leg = await readRaw<T>(legacy);
+  if (!leg.found) return MISSING;
+  return { value: leg.value, found: true, fromLegacy: true };
+}
+
 export async function readJson<T>(key: string): Promise<T | null> {
   return (await readTagged<T>(key)).value;
 }
 
 /** Write via a temp file so a concurrent reader never sees half a file. `create` fails with EEXIST if the key exists. */
-async function writeLocal(key: string, data: string, create = false): Promise<void> {
-  const p = localPath(key);
+async function writeLocal(dir: string, key: string, data: string, create = false): Promise<void> {
+  const p = localPath(dir, key);
   await fs.mkdir(path.dirname(p), { recursive: true });
   const tmp = `${p}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
   await fs.writeFile(tmp, data);
@@ -97,20 +166,25 @@ async function writeLocal(key: string, data: string, create = false): Promise<vo
 }
 
 export async function writeJson(key: string, value: unknown): Promise<void> {
-  if (LOCAL_DIR) return writeLocal(key, JSON.stringify(value));
-  await put(key, JSON.stringify(value), { ...PUT_OPTIONS, allowOverwrite: true });
+  const { primary } = resolveBlobKey(key);
+  const dir = localDir();
+  if (dir) return writeLocal(dir, primary, JSON.stringify(value));
+  await put(primary, JSON.stringify(value), { ...putOptions(), allowOverwrite: true });
 }
 
 /** Create `key` only if it doesn't exist yet. False when it already does (someone else got it). */
 export async function createJson(key: string, value: unknown): Promise<boolean> {
+  const { primary, legacy } = resolveBlobKey(key);
+  const dir = localDir();
+  if (legacy && (await readRaw(legacy).catch(() => MISSING)).found) return false;
   try {
-    if (LOCAL_DIR) await writeLocal(key, JSON.stringify(value), true);
-    else await put(key, JSON.stringify(value), { ...PUT_OPTIONS, allowOverwrite: false });
+    if (dir) await writeLocal(dir, primary, JSON.stringify(value), true);
+    else await put(primary, JSON.stringify(value), { ...putOptions(), allowOverwrite: false });
     return true;
   } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "EEXIST" || (!LOCAL_DIR && isAlreadyExists(e))) return false;
+    if ((e as NodeJS.ErrnoException).code === "EEXIST" || (!dir && isAlreadyExists(e))) return false;
     // Don't rely on the wording of the error: if the key exists now, someone else created it.
-    if (!LOCAL_DIR && (await readTagged(key).catch(() => MISSING)).found) return false;
+    if (!dir && (await readRaw(primary).catch(() => MISSING)).found) return false;
     throw e;
   }
 }
@@ -143,19 +217,26 @@ const UPDATE_TRIES = 6;
  */
 export async function updateJson<T>(key: string, mutate: (current: T | null) => T | null): Promise<{ value: T | null; changed: boolean }> {
   return withKeyLock(key, async () => {
+    const { primary } = resolveBlobKey(key);
+    const dir = localDir();
     for (let attempt = 1; attempt <= UPDATE_TRIES; attempt++) {
-      const { value, found, etag } = await readTagged<T>(key);
+      const { value, found, etag, fromLegacy } = await readTagged<T>(key);
       const next = mutate(value);
       if (next === null) return { value, changed: false };
+      const creatingPrimary = !found || !!fromLegacy;
       try {
-        if (LOCAL_DIR) await writeLocal(key, JSON.stringify(next));
+        if (dir) await writeLocal(dir, primary, JSON.stringify(next));
         // (No ETag on an existing blob shouldn't happen; then fall back to a plain overwrite.)
-        else await put(key, JSON.stringify(next), { ...PUT_OPTIONS, ...(!found ? { allowOverwrite: false } : etag ? { ifMatch: etag } : { allowOverwrite: true }) });
+        else
+          await put(primary, JSON.stringify(next), {
+            ...putOptions(),
+            ...(creatingPrimary ? { allowOverwrite: false } : etag ? { ifMatch: etag } : { allowOverwrite: true }),
+          });
         return { value: next, changed: true };
       } catch (e) {
-        if (LOCAL_DIR) throw e;
+        if (dir) throw e;
         // A create-only write that failed for any reason counts as a clash if the key exists now.
-        const clash = isWriteConflict(e) || (!found && (await readTagged(key).catch(() => MISSING)).found);
+        const clash = isWriteConflict(e) || (creatingPrimary && (await readRaw(primary).catch(() => MISSING)).found);
         if (!clash) throw e;
         await new Promise((r) => setTimeout(r, 25 * attempt + Math.random() * 75));
       }
@@ -164,17 +245,24 @@ export async function updateJson<T>(key: string, mutate: (current: T | null) => 
   });
 }
 
+async function deleteRaw(storageKey: string): Promise<void> {
+  const dir = localDir();
+  if (dir) {
+    await fs.rm(localPath(dir, storageKey), { force: true });
+    return;
+  }
+  try {
+    const meta = await head(storageKey);
+    await del(meta.url);
+  } catch {
+    /* already gone */
+  }
+}
+
 export async function deleteJson(key: string): Promise<void> {
   await withKeyLock(key, async () => {
-    if (LOCAL_DIR) {
-      await fs.rm(localPath(key), { force: true });
-      return;
-    }
-    try {
-      const meta = await head(key);
-      await del(meta.url);
-    } catch {
-      /* already gone */
-    }
+    const { primary, legacy } = resolveBlobKey(key);
+    await deleteRaw(primary);
+    if (legacy && legacy !== primary) await deleteRaw(legacy);
   });
 }

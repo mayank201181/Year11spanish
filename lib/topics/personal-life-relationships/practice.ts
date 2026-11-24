@@ -508,10 +508,10 @@ export const practice: TopicPractice = {
           question:
             "Read Carmen's interview:\n*«Mi modelo a seguir es mi hermano mayor, Mateo. Nació con sordera profunda, pero aprendió lengua de signos y lectura labial, se graduó en arquitectura el verano pasado y hoy diseña edificios accesibles para todos.»*\nWhy does Carmen admire Mateo?",
           options: [
-            "He became a famous sign-language teacher in primary schools.",
+            "Despite starting late, he became a famous sign-language teacher across local primary schools last year.",
             "Born profoundly deaf, he graduated in architecture last summer and now designs accessible buildings.",
-            "He overcame a leg injury to win an Olympic medal last summer.",
-            "He plans to start studying architecture when he turns twenty.",
+            "After recovering from a serious leg injury, he won a national Olympic swimming medal last summer.",
+            "Although still at sixth form, he plans to start studying architecture once he turns twenty next autumn.",
           ],
           answerIndex: 1,
           difficulty: "core",
@@ -801,9 +801,9 @@ export const practice: TopicPractice = {
           question:
             "Read Sofía's opinion on marriage:\n*«No estoy en contra del matrimonio, pero me parece absurdo gastarse treinta mil euros en un solo día de fiesta cuando ese dinero serviría para la entrada de un piso.»*\nWhat exactly does Sofía criticise?",
           options: [
-            "Getting married before finishing university.",
-            "Living with roommates in a shared flat.",
-            "Cohabiting without signing a legal contract.",
+            "Getting married too young before finishing a university degree and securing a job.",
+            "Sharing a rented flat with university roommates instead of living with parents.",
+            "Cohabiting with a long-term partner without signing a formal legal marriage contract.",
             "Spending thirty thousand euros on a one-day wedding party instead of a flat deposit.",
           ],
           answerIndex: 3,
@@ -907,10 +907,10 @@ export const practice: TopicPractice = {
           question:
             "Read Don Antonio's memory:\n*«En mi juventud no teníamos calefacción central ni ordenadores, pero nos reuníamos todas las tardes en la plaza del pueblo y conocíamos el nombre de cada vecino. Hoy en día, en mi bloque de pisos, apenas nos saludamos en el ascensor.»*\nWhat contrast does Don Antonio draw between past and present?",
           options: [
-            "People used to argue with neighbours, whereas now everyone chats in the lift.",
+            "People constantly argued with their neighbours in the village square, whereas nowadays everyone chats warmly in the lift.",
             "Without modern comforts, neighbours socialised every afternoon and knew everyone, whereas today flat-dwellers barely greet each other.",
-            "He misses having central heating and computers in his village square.",
-            "Young people today spend too much time talking in the village square.",
+            "He mainly misses having central heating and desktop computers in his childhood village square compared with his current flat.",
+            "Young people today spend far too many afternoons gossiping in the village square instead of greeting neighbours indoors.",
           ],
           answerIndex: 1,
           difficulty: "core",

@@ -166,7 +166,11 @@ interface StoreValue {
   status: Status;
   mode: Mode;
   /** Accounts/cloud sync available on this deployment. */
+  accountsAvailable: boolean;
+  /** Backwards-compatible alias for accountsAvailable. */
   cloudAvailable: boolean;
+  /** Live AI tutor available on this deployment. */
+  aiAvailable: boolean;
   account: Account | null;
   activeProfile: Profile | null;
   data: ProgressDoc;
@@ -212,7 +216,8 @@ const StoreContext = createContext<StoreValue | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<Status>("loading");
   const [mode, setMode] = useState<Mode>("cloud");
-  const [cloudAvailable, setCloudAvailable] = useState(false);
+  const [accountsAvailable, setAccountsAvailable] = useState(false);
+  const [aiAvailable, setAiAvailable] = useState(false);
   const [account, setAccount] = useState<Account | null>(null);
   const [activeProfile, setActiveProfile] = useState<Profile | null>(null);
   const [data, setData] = useState<ProgressDoc>(() => emptyProgress(0));
@@ -222,11 +227,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const accountRef = useRef(account);
   const activeRef = useRef(activeProfile);
   const modeRef = useRef(mode);
+  const accountsAvailableRef = useRef(accountsAvailable);
   useLayoutEffect(() => {
     dataRef.current = data;
     accountRef.current = account;
     activeRef.current = activeProfile;
     modeRef.current = mode;
+    accountsAvailableRef.current = accountsAvailable;
   });
   const canSaveRef = useRef(false);
   const loadVersion = useRef(0);
@@ -409,7 +416,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const res = await fetch("/api/auth/me", { method: "GET", signal: ctrl.signal });
       const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
       if (!res.ok || typeof data.accounts !== "boolean") return;
-      setCloudAvailable(data.accounts);
+      setAccountsAvailable(data.accounts);
+      setAiAvailable(data.ai === true);
       const acc = data.account && typeof data.account === "object" ? (data.account as Account) : null;
       if (acc) {
         acc.profiles = Array.isArray(acc.profiles) ? acc.profiles : [];
@@ -559,6 +567,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const startGuest = useCallback(() => loadGuest(), [loadGuest]);
 
   const leaveGuest = useCallback(() => {
+    if (!accountsAvailableRef.current) return;
     ++loadVersion.current;
     canSaveRef.current = false;
     lsDel(k.mode);
@@ -679,10 +688,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const refreshAccount = useCallback(async () => {
     const r = await callJson("/api/auth/me", "GET");
-    if (r.ok && r.data.account) {
-      const acc = r.data.account as Account;
-      setAccount(acc);
-      setActiveProfile((p) => (p ? acc.profiles.find((x) => x.id === p.id) ?? p : p));
+    if (r.ok) {
+      if (typeof r.data.accounts === "boolean") setAccountsAvailable(r.data.accounts);
+      if (typeof r.data.ai === "boolean") setAiAvailable(r.data.ai);
+      if (r.data.account) {
+        const acc = r.data.account as Account;
+        setAccount(acc);
+        setActiveProfile((p) => (p ? acc.profiles.find((x) => x.id === p.id) ?? p : p));
+      }
     }
   }, []);
 
@@ -930,7 +943,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     () => ({
       status,
       mode,
-      cloudAvailable,
+      accountsAvailable,
+      cloudAvailable: accountsAvailable,
+      aiAvailable,
       account,
       activeProfile,
       data,
@@ -964,7 +979,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       flagQuestion,
       resetAll,
     }),
-    [status, mode, cloudAvailable, account, activeProfile, data, focusTopics, signup, login, logout, startGuest, leaveGuest, createProfile, importGuest, updateProfile, deleteProfile, selectProfile, switchProfile, retryLoad, refreshAccount, guestHasProgress, recordAnswer, recordSkill, award, saveAttempt, clearAttempt, markSectionRead, finishDaily, setBest, setGoalMinutes, setWeeklyDays, setFocusTopics, setLast, flagQuestion, resetAll],
+    [status, mode, accountsAvailable, aiAvailable, account, activeProfile, data, focusTopics, signup, login, logout, startGuest, leaveGuest, createProfile, importGuest, updateProfile, deleteProfile, selectProfile, switchProfile, retryLoad, refreshAccount, guestHasProgress, recordAnswer, recordSkill, award, saveAttempt, clearAttempt, markSectionRead, finishDaily, setBest, setGoalMinutes, setWeeklyDays, setFocusTopics, setLast, flagQuestion, resetAll],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

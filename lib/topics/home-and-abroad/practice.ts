@@ -730,10 +730,10 @@ export const practice: TopicPractice = {
           question:
             "Read Carmen's opinion on *Las Fallas*:\n*«Soy valenciana y me fascina el arte de los monumentos, pero reconozco que durante esa semana es casi imposible dormir en el centro por culpa de los petardos constantes.»*\nWhat is Carmen's attitude towards *Las Fallas*?",
           options: [
-            "She hates the monuments and leaves Valencia every March.",
+            "She dislikes the painted sculptures and travels out of Valencia every March to escape the tourist crowds.",
             "She loves the artistry of the sculptures, though the non-stop firecrackers make sleeping in the centre nearly impossible.",
-            "She thinks firecrackers are the best part and finds the statues boring.",
-            "She wishes the festival lasted a whole month instead of one week.",
+            "She thinks the loud firecrackers are the highlight of the week and finds the traditional statues repetitive and dull.",
+            "She wishes the city council extended the street festival to last an entire month instead of just one short week.",
           ],
           answerIndex: 1,
           hints: [
@@ -815,10 +815,10 @@ export const practice: TopicPractice = {
           question:
             "Read this debate extract on mass tourism:\n*«Si el gobierno no limita los pisos turísticos en el centro, los jóvenes locales no podrán pagar el alquiler y los barrios perderán su identidad.»*\nWhich grammatical structure does the author use, and what is the warning?",
           options: [
-            "Type-2 hypothetical si clause: tourists can no longer afford hotel rooms.",
+            "Type-2 hypothetical si clause (Si + Imperfect Subjunctive → Conditional): foreign tourists can no longer afford central hotel rooms.",
             "Type-1 real si condition (Si + Present → Future): without limits on tourist flats, local youth won't afford rent and districts will lose their identity.",
-            "Past narrative: the government banned all tourist apartments last year.",
-            "Subjunctive wish: young people hope more tourist flats open in their neighbourhood.",
+            "Past completed narrative (Preterite + Imperfect): the national government banned all short-term tourist apartments across Spain last year.",
+            "Present subjunctive wish (Ojalá + Subjunctive): young residents hope more short-term holiday flats open throughout their central neighbourhood.",
           ],
           answerIndex: 1,
           hints: [

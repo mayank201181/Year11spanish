@@ -48,7 +48,7 @@ async def main():
             await browser.close()
             os._exit(0)
 
-        fps = 8
+        fps = int(tl.get("fps") or 24)
         N = int(tl["duration"] * fps) + 1
         workers = int(opt("--workers", 1))
         per = (N + workers - 1) // workers
@@ -61,8 +61,10 @@ async def main():
             seg_path = os.path.join(out_dir, f"part{w}.mp4")
             proc = subprocess.Popen(
                 [FFMPEG, "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(fps),
-                 "-c:v", "mjpeg", "-i", "-", "-c:v", "libx264", "-preset", "ultrafast",
-                 "-crf", "26", "-pix_fmt", "yuv420p", "-tune", "animation", seg_path],
+                 "-c:v", "mjpeg", "-i", "-",
+                 "-vf", "scale=in_range=full:out_range=tv,format=yuv420p",
+                 "-c:v", "libx264", "-preset", "ultrafast",
+                 "-crf", "26", "-pix_fmt", "yuv420p", "-color_range", "tv", "-tune", "animation", seg_path],
                 stdin=subprocess.PIPE
             )
             for i in range(a, b, 24):

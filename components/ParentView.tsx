@@ -174,7 +174,7 @@ const SLIP_STARTERS = [
 // ------------------------------------------------------------------ view
 
 export function ParentView({ summaries }: { summaries: TopicSummary[] }) {
-  const { mode, account, cloudAvailable, leaveGuest, refreshAccount } = useStore();
+  const { mode, account, accountsAvailable, leaveGuest, refreshAccount } = useStore();
   const [pin, setPin] = useState("");
   const [unlockedPin, setUnlockedPin] = useState<string | null>(null);
   const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -190,7 +190,7 @@ export function ParentView({ summaries }: { summaries: TopicSummary[] }) {
           👪
         </div>
         <h1 className="mt-2 text-2xl font-black">Parent dashboard</h1>
-        {cloudAvailable ? (
+        {accountsAvailable ? (
           <>
             <p className="mt-3 text-ink-2">
               The parent dashboard needs a free family account. It keeps each learner&apos;s progress safe across devices and lets you see how they&apos;re getting on —

@@ -340,9 +340,9 @@ export const paper: ExamPaper = {
       question:
         "Read the news excerpt on drought in Andalusia:\n\n*«A pesar de que se han instalado miles de paneles solares este año, los agricultores advierten que la sequía seguirá empeorando a menos que el gobierno invierta urgentemente en sistemas de riego más eficientes.»*\n\nWhat warning do the farmers give?",
       options: [
-        "Solar panels have caused the drought to worsen this year.",
-        "The drought has already ended thanks to new irrigation systems.",
-        "Farmers refuse to use renewable energy on their farms.",
+        "Newly installed solar panels have directly caused the Andalusian drought to worsen sharply this year.",
+        "The severe drought across Andalusia has already ended thanks to modern solar-powered irrigation systems.",
+        "Local farmers refuse to install renewable solar energy on their agricultural land until subsidies rise.",
         "The drought will carry on getting worse unless the government invests urgently in more efficient irrigation.",
       ],
       answerIndex: 3,

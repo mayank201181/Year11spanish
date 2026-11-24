@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 type Tab = "welcome" | "login" | "signup";
 
 export function AuthGate() {
-  const { login, signup, startGuest, cloudAvailable } = useStore();
+  const { login, signup, startGuest, accountsAvailable } = useStore();
   const [tab, setTab] = useState<Tab>("welcome");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +35,7 @@ export function AuthGate() {
 
       {tab === "welcome" ? (
         <div className="mt-8 space-y-3">
-          {cloudAvailable ? (
+          {accountsAvailable ? (
             <>
               <button type="button" className="btn btn-primary w-full text-lg" onClick={() => setTab("login")}>
                 Sign in
@@ -46,9 +46,9 @@ export function AuthGate() {
             </>
           ) : null}
           <button type="button" className="btn btn-ghost w-full" onClick={startGuest}>
-            {cloudAvailable ? "Just practise on this device (guest)" : "Start practising"}
+            {accountsAvailable ? "Just practise on this device (guest)" : "Start practising"}
           </button>
-          {cloudAvailable ? <p className="text-center text-xs text-ink-2">A family account syncs progress across devices and unlocks the parent dashboard and Profe Lola.</p> : null}
+          {accountsAvailable ? <p className="text-center text-xs text-ink-2">A family account syncs progress across devices and unlocks the parent dashboard and Profe Lola.</p> : null}
         </div>
       ) : (
         <form className="card mt-8 space-y-4 p-5" onSubmit={submit}>

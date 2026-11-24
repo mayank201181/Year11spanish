@@ -636,9 +636,9 @@ export const mcqPapers: Paper[] = [
         question:
           "What does **la brecha generacional** refer to in Area C?",
         options: [
-          "A traditional wedding anniversary party.",
-          "A school exchange programme abroad.",
-          "A childhood game played in town squares.",
+          "A traditional golden wedding anniversary celebration shared by extended families.",
+          "A secondary-school language exchange programme organised with a partner town abroad.",
+          "A traditional outdoor childhood game played by families in Spanish town squares.",
           "The generation gap in values and habits between young and older people.",
         ],
         answerIndex: 3,

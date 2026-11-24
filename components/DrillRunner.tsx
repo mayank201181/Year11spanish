@@ -110,9 +110,9 @@ export function DrillRunner({ drills, title, onExit }: { drills: Drill[]; title?
   }
 
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
+        <div className="min-w-0">
           <div className="text-xs font-bold uppercase tracking-wide text-ink-2">{title ?? "Skill practice"}</div>
           <div className="text-lg font-extrabold">{cur.drill.title}</div>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">

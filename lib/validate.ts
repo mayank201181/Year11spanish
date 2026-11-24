@@ -90,6 +90,16 @@ export function checkQuestion(where: string, q: Question, sectionIds: Set<string
       if (new Set(norm).size !== norm.length) issues.push({ where, problem: "duplicate options" });
     }
     if (!Number.isInteger(q.answerIndex) || q.answerIndex < 0 || q.answerIndex > 3) issues.push({ where, problem: "answerIndex out of range" });
+    else if (Array.isArray(q.options) && q.options.length === 4) {
+      const correctLen = q.options[q.answerIndex].trim().length;
+      const longestDistractor = Math.max(0, ...q.options.filter((_, i) => i !== q.answerIndex).map((o) => o.trim().length));
+      if (longestDistractor === 0 || correctLen > 1.6 * longestDistractor) {
+        issues.push({
+          where,
+          problem: `correct MCQ option (${correctLen} chars) is conspicuously longest (>1.6× longest distractor ${longestDistractor} chars)`,
+        });
+      }
+    }
     checkText(`${where}.explanation`, q.explanation, issues);
     const posRe = /\b(?:[Oo]ption|[Aa]nswer|[Cc]hoice)\s*\(?[A-D]\)?(?![a-z])|\b[A-D]\)\s|\b[Tt]he (?:first|second|third|fourth|last) (?:option|answer|choice)\b/;
     if (posRe.test(q.explanation)) {
@@ -109,7 +119,9 @@ export function checkQuestion(where: string, q: Question, sectionIds: Set<string
     if (q.commonError) checkText(`${where}.commonError`, q.commonError, issues);
     checkTraps(where, q.answer, q.traps, issues);
   } else if (q.kind === "written") {
-    if (q.marks !== q.markScheme?.length) issues.push({ where, problem: `marks (${q.marks}) must equal markScheme length (${q.markScheme?.length})` });
+    const msLen = q.markScheme?.length ?? 0;
+    if (msLen < q.marks) issues.push({ where, problem: `markScheme has fewer points (${msLen}) than marks (${q.marks})` });
+    else if (q.marks !== msLen) issues.push({ where, problem: `marks (${q.marks}) must equal markScheme length (${msLen})` });
     checkText(`${where}.modelAnswer`, q.modelAnswer, issues);
     q.markScheme?.forEach((p, i) => {
       checkText(`${where}.markScheme[${i}].point`, p.point, issues);

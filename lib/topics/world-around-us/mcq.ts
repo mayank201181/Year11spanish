@@ -612,9 +612,9 @@ export const mcqPapers: Paper[] = [
           "What does **la brecha digital** refer to?",
         options: [
           "Inequality between those with and without reliable access to internet and digital devices",
-          "A cracked smartphone screen",
-          "A fast wireless fibre-optic cable",
-          "A popular video-sharing app",
+          "Physical damage such as a cracked smartphone screen or broken tablet charger in schools",
+          "A high-speed wireless fibre-optic network installed across rural mountain communities",
+          "A viral video-sharing platform used mainly by teenagers to follow online influencers",
         ],
         answerIndex: 0,
         hints: [
@@ -848,9 +848,9 @@ export const mcqPapers: Paper[] = [
         question:
           "Read Sofía's reflection: *«El año pasado colaboré en un banco de alimentos; clasificábamos latas y arroz mientras charlábamos, y aprendí a valorar lo que tenemos.»* Why are *clasificábamos* and *charlábamos* in the **imperfect**, whereas *aprendí* is in the **preterite**?",
         options: [
-          "Because *clasificar* and *charlar* do not exist in the preterite",
-          "Because Sofía is talking about next year's plans",
-          "Because *aprendí* means 'I used to learn every week'",
+          "Because regular -ar verbs like *clasificar* and *charlar* never take preterite endings in standard Spanish",
+          "Because Sofía is describing hypothetical volunteering plans she hopes to complete sometime next summer",
+          "Because *aprendí* expresses a repeated weekly habit in the past ('I used to learn every single week')",
           "Because ongoing background tasks take the imperfect, while the overall lesson learnt is a completed takeaway in the preterite",
         ],
         answerIndex: 3,
@@ -932,9 +932,9 @@ export const mcqPapers: Paper[] = [
         question:
           "Choose the connector pair that cleanly introduces **two contrasting sides** of a technology debate:",
         options: [
-          "Primero… y además…",
-          "Porque… puesto que…",
-          "Así que… por lo tanto…",
+          "Primero… y además, también cabe añadir…",
+          "Porque… puesto que, dado que es obvio…",
+          "Así que… por lo tanto, en consecuencia…",
           "Por un lado… sin embargo, por otro lado…",
         ],
         answerIndex: 3,

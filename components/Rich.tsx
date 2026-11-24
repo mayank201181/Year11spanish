@@ -34,7 +34,7 @@ function pushStyled(text: string, out: ReactNode[]) {
       const end = text.indexOf("`", i + 1);
       if (end > i + 1) {
         flush();
-        out.push(<code key={out.length}>{text.slice(i + 1, end)}</code>);
+        out.push(<code key={out.length} className="break-words">{text.slice(i + 1, end)}</code>);
         i = end;
       } else buf += c;
     } else if (c === "*" && text[i + 1] === "*") {

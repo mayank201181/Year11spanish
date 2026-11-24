@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build + render one or more episodes end to end using read-only .tts-env (WORKERS=1, ultrafast, 8fps).
+# Build + render one or more episodes end to end using read-only .tts-env (WORKERS=1, ultrafast, 24fps, yuv420p TV range, loudnorm -16 LUFS / -1.5 dBTP).
 set -euo pipefail
 cd "$(dirname "$0")"
 ROOT="$(cd ../.. && pwd)"
@@ -13,10 +13,10 @@ for T in "$@"; do
   MP4="$ROOT/public/videos/$T.mp4"
   JPG="$ROOT/public/videos/posters/$T.jpg"
   if [ -s "$MP4" ] && [ -s "$JPG" ]; then
-    CODECS="$("$FFPROBE" -v error -show_entries stream=codec_name -of csv=p=0 "$MP4" | tr '\n' ',' || true)"
+    INFO="$("$FFPROBE" -v error -show_entries stream=codec_name,pix_fmt,color_range,r_frame_rate -of compact "$MP4" || true)"
     DUR="$("$FFPROBE" -v error -show_entries format=duration -of csv=p=0 "$MP4" 2>/dev/null || echo 0)"
-    if echo "$CODECS" | grep -q "h264" && echo "$CODECS" | grep -q "aac" && awk "BEGIN {exit !($DUR > 60)}"; then
-      echo "=== $T: already valid ($DUR s, $CODECS) — skipping"
+    if echo "$INFO" | grep -q "codec_name=h264" && echo "$INFO" | grep -q "codec_name=aac" && echo "$INFO" | grep -q "pix_fmt=yuv420p" && echo "$INFO" | grep -q "color_range=tv" && echo "$INFO" | grep -q "r_frame_rate=24/1" && awk "BEGIN {exit !($DUR > 60)}"; then
+      echo "=== $T: already valid V3 ($DUR s, 24fps yuv420p tv) — skipping"
       continue
     fi
   fi
