@@ -3,6 +3,8 @@ import { useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import type { TopicCramPack } from "@/lib/cram";
+import { sortForYear10, topicCourseYear, useCourseYearFilter } from "@/lib/courseYear";
+import { CourseYearBanner, Year11Divider } from "./CourseYearBanner";
 import { Rich, RichInline } from "./Rich";
 
 type SectionFilter = "all" | "mistakes" | "mustknow" | "myths" | "tricks" | "facts";
@@ -135,9 +137,14 @@ export function CramSheet({
 
   const strands = useMemo(() => Array.from(new Set(packs.map((p) => p.strand).filter(Boolean))), [packs]);
 
+  const year10 = useCourseYearFilter() === 10 && !singleTopicMode;
+  const orderedPacks = useMemo(() => (year10 ? sortForYear10(packs) : packs), [year10, packs]);
+  const y10PackCount = useMemo(() => packs.filter((p) => topicCourseYear(p.id) === 10).length, [packs]);
+  const y11PackCount = packs.length - y10PackCount;
+
   const qNorm = query.trim().toLowerCase();
   const visiblePacks = useMemo(() => {
-    return packs.filter((p) => {
+    return orderedPacks.filter((p) => {
       if (!selectedIds.has(p.id)) return false;
       if (!qNorm) return true;
       const hay = [
@@ -154,13 +161,14 @@ export function CramSheet({
         .toLowerCase();
       return hay.includes(qNorm);
     });
-  }, [packs, selectedIds, qNorm]);
+  }, [orderedPacks, selectedIds, qNorm]);
 
   const totalMistakes = visiblePacks.reduce((s, p) => s + p.examMistakes.length + p.questionTraps.length, 0);
   const totalMustKnow = visiblePacks.reduce((s, p) => s + p.mustKnow.length, 0);
 
   return (
     <div className="space-y-6 pb-8">
+      {year10 ? <CourseYearBanner y10Count={y10PackCount} y11Count={y11PackCount} /> : null}
       {!singleTopicMode ? (
         <header className="card space-y-4 p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -224,8 +232,9 @@ export function CramSheet({
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {packs.map((p) => {
+              {orderedPacks.map((p) => {
                 const active = selectedIds.has(p.id);
+                const isY11 = year10 && topicCourseYear(p.id) !== 10;
                 return (
                   <button
                     key={p.id}
@@ -235,10 +244,15 @@ export function CramSheet({
                       active
                         ? "border-brand bg-brand text-white shadow-sm"
                         : "border-line bg-surface text-ink-2 hover:border-brand/50 hover:text-ink"
-                    }`}
+                    } ${isY11 ? "opacity-60 hover:opacity-95" : ""}`}
                   >
                     <span aria-hidden>{p.icon}</span>
                     <span>{p.title}</span>
+                    {year10 ? (
+                      <span className={`rounded px-1 text-[10px] ${active ? "bg-white/20" : "bg-surface-2 text-ink-2"}`}>
+                        Y{topicCourseYear(p.id)}
+                      </span>
+                    ) : null}
                     {active ? <span aria-hidden>✓</span> : null}
                   </button>
                 );
@@ -311,8 +325,22 @@ export function CramSheet({
             </button>
           </div>
         ) : null}
-        {visiblePacks.map((pack) => (
-          <article key={pack.id} className="card space-y-6 overflow-hidden p-5 sm:p-6">
+        {visiblePacks.map((pack, idx) => {
+          const packYear = year10 ? topicCourseYear(pack.id) : undefined;
+          const prevYear = year10 && idx > 0 ? topicCourseYear(visiblePacks[idx - 1].id) : undefined;
+          const showDivider = year10 && packYear === 11 && (idx === 0 || prevYear === 10);
+          const remainingY11 = showDivider ? visiblePacks.filter((x) => topicCourseYear(x.id) === 11).length : 0;
+          return (
+          <div key={pack.id} className={showDivider ? "space-y-6" : undefined}>
+          {showDivider ? <Year11Divider count={remainingY11} /> : null}
+          <article
+            data-course-year-item={packYear}
+            className={
+              packYear === 11
+                ? "card space-y-6 overflow-hidden p-5 sm:p-6 opacity-60 grayscale-[30%] transition-opacity hover:opacity-100"
+                : "card space-y-6 overflow-hidden p-5 sm:p-6"
+            }
+          >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
               <div className="flex items-center gap-3">
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-soft text-2xl" aria-hidden>
@@ -320,6 +348,11 @@ export function CramSheet({
                 </span>
                 <div>
                   <span className="text-xs font-bold uppercase tracking-wider text-brand">{pack.strand}</span>
+                  {packYear ? (
+                    <span className={`mb-0.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-bold ${packYear === 10 ? "bg-brand-soft text-brand" : "bg-surface-2 text-ink-2"}`}>
+                      Year {packYear}
+                    </span>
+                  ) : null}
                   <h2 className="text-xl font-black sm:text-2xl">{pack.title}</h2>
                 </div>
               </div>
@@ -488,7 +521,9 @@ export function CramSheet({
               </section>
             ) : null}
           </article>
-        ))}
+          </div>
+          );
+        })}
       </div>
     </div>
   );

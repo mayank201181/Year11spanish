@@ -1,11 +1,13 @@
 "use client";
 // /episodes — every ¡Qué Caos! episode in one place: a player plus a playlist,
 // with an optional binge mode that rolls straight into the next episode.
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SHOW_TITLE, SITCOM_EPISODES } from "@/lib/sitcom";
+import { topicCourseOrder, topicCourseYear, useCourseYearFilter } from "@/lib/courseYear";
+import { CourseYearBanner, Year11Divider } from "./CourseYearBanner";
 import { EpisodePlayer, formatDuration, useWatchedEpisodes } from "./EpisodePlayer";
 
 export function EpisodesHub() {
@@ -14,8 +16,19 @@ export function EpisodesHub() {
   const watched = useWatchedEpisodes();
   const [binge, setBinge] = useState(false);
   const [autoPlay, setAutoPlay] = useState(false);
+  const year10 = useCourseYearFilter() === 10;
 
-  const eps = SITCOM_EPISODES;
+  const eps = useMemo(() => {
+    if (!year10) return SITCOM_EPISODES;
+    return [...SITCOM_EPISODES].sort((a, b) => {
+      const ya = topicCourseYear(a.topicId);
+      const yb = topicCourseYear(b.topicId);
+      if (ya !== yb) return ya - yb;
+      return topicCourseOrder(a.topicId) - topicCourseOrder(b.topicId);
+    });
+  }, [year10]);
+  const y10Eps = useMemo(() => (year10 ? eps.filter((e) => topicCourseYear(e.topicId) === 10) : []), [year10, eps]);
+  const y11Eps = useMemo(() => (year10 ? eps.filter((e) => topicCourseYear(e.topicId) !== 10) : []), [year10, eps]);
   const requested = Number(params.get("ep"));
   const current = eps.find((e) => e.num === requested) ?? eps.find((e) => !watched[e.topicId]) ?? eps[0];
   const watchedCount = eps.filter((e) => watched[e.topicId]).length;
@@ -27,13 +40,14 @@ export function EpisodesHub() {
 
   const pick = (num: number, play: boolean) => {
     setAutoPlay(play);
-    router.replace(`/episodes?ep=${num}`, { scroll: false });
+    router.replace(year10 ? `/episodes?ep=${num}&year=10` : `/episodes?ep=${num}`, { scroll: false });
     if (play) window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const next = eps[eps.indexOf(current) + 1];
 
   return (
     <div className="space-y-5 pb-8">
+      {year10 ? <CourseYearBanner y10Count={y10Eps.length} y11Count={y11Eps.length} noun="episodes" /> : null}
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="flex flex-wrap gap-2">
@@ -76,7 +90,80 @@ export function EpisodesHub() {
 
       <section>
         <h2 className="mb-3 text-lg font-extrabold">All episodes</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {year10 ? (
+          <div className="space-y-5">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {y10Eps.map((e) => (
+                <button
+                  key={e.num}
+                  type="button"
+                  data-course-year-item={10}
+                  onClick={() => pick(e.num, true)}
+                  className={`card overflow-hidden p-0 text-left transition-colors hover:border-brand ${
+                    e.num === current.num ? "border-2 border-brand" : ""
+                  }`}
+                >
+                  <div className="relative">
+                    <Image src={e.poster} alt="" width={640} height={360} className="aspect-video w-full object-cover" />
+                    <span className="absolute right-2 bottom-2 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-bold text-white">
+                      {formatDuration(e.durationSec)}
+                    </span>
+                    <span className="absolute top-2 right-2 rounded-md bg-brand px-1.5 py-0.5 text-[11px] font-extrabold text-brand-ink">
+                      Year 10
+                    </span>
+                    {watched[e.topicId] ? (
+                      <span className="absolute top-2 left-2 rounded-md bg-good px-1.5 py-0.5 text-xs font-bold text-white">Watched ✓</span>
+                    ) : null}
+                  </div>
+                  <div className="p-3">
+                    <div className="text-xs font-bold text-brand">
+                      Ep {e.num} · {e.topicShort}
+                    </div>
+                    <div className="font-extrabold leading-snug">{e.title}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+            {y11Eps.length > 0 ? (
+              <>
+                <Year11Divider count={y11Eps.length} noun="episodes" />
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {y11Eps.map((e) => (
+                    <button
+                      key={e.num}
+                      type="button"
+                      data-course-year-item={11}
+                      onClick={() => pick(e.num, true)}
+                      className={`card overflow-hidden p-0 text-left opacity-60 grayscale-[35%] transition hover:border-brand hover:opacity-95 ${
+                        e.num === current.num ? "border-2 border-brand" : ""
+                      }`}
+                    >
+                      <div className="relative">
+                        <Image src={e.poster} alt="" width={640} height={360} className="aspect-video w-full object-cover" />
+                        <span className="absolute right-2 bottom-2 rounded-md bg-black/75 px-1.5 py-0.5 text-xs font-bold text-white">
+                          {formatDuration(e.durationSec)}
+                        </span>
+                        <span className="absolute top-2 right-2 rounded-md bg-surface-2/95 px-1.5 py-0.5 text-[11px] font-bold text-ink-2">
+                          Year 11
+                        </span>
+                        {watched[e.topicId] ? (
+                          <span className="absolute top-2 left-2 rounded-md bg-good px-1.5 py-0.5 text-xs font-bold text-white">Watched ✓</span>
+                        ) : null}
+                      </div>
+                      <div className="p-3">
+                        <div className="text-xs font-bold text-brand">
+                          Ep {e.num} · {e.topicShort}
+                        </div>
+                        <div className="font-extrabold leading-snug">{e.title}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {eps.map((e) => (
             <button
               key={e.num}
@@ -104,6 +191,7 @@ export function EpisodesHub() {
             </button>
           ))}
         </div>
+        )}
       </section>
     </div>
   );

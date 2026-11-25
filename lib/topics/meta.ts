@@ -21,6 +21,10 @@ export interface TopicMeta {
   title: string;
   strand: Strand;
   icon: string;
+  /** Which IGCSE year normally teaches this topic (Year 10 vs Year 11). */
+  courseYear: 10 | 11;
+  /** Teaching order used when ?year=10 is active (1..N). */
+  courseOrder: number;
   /** Edexcel 4SP0 syllabus area + assessment objectives. */
   curriculum: string;
   sections: SectionPlan[];
@@ -46,6 +50,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Area A — Home & Abroad (La vida en casa y en el extranjero)",
     strand: "Home, Study & Work",
     icon: "✈️",
+    courseYear: 10,
+    courseOrder: 1,
     curriculum: "Edexcel 4SP0 Area A: Regions & towns, accommodation, holidays, transport, weather, Hispanic festivals & directions",
     sections: [
       S(
@@ -81,6 +87,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Area B — Education & Employment (La educación y el trabajo)",
     strand: "Home, Study & Work",
     icon: "🎓",
+    courseYear: 11,
+    courseOrder: 5,
     curriculum: "Edexcel 4SP0 Area B: School life/rules, post-16 & university plans, part-time jobs, work experience & future careers",
     sections: [
       S(
@@ -118,6 +126,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Area C — Personal Life & Relationships (La vida personal y las relaciones)",
     strand: "People, World & Health",
     icon: "🤝",
+    courseYear: 10,
+    courseOrder: 2,
     curriculum: "Edexcel 4SP0 Area C: Family dynamics, marriage & partnerships, peer pressure, childhood memories in Imperfect & role models",
     sections: [
       S(
@@ -153,6 +163,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Area D — The World Around Us (El mundo que nos rodea)",
     strand: "People, World & Health",
     icon: "🌍",
+    courseYear: 11,
+    courseOrder: 6,
     curriculum: "Edexcel 4SP0 Area D: Climate change, pollution, sustainability, global social issues, volunteering & digital media",
     sections: [
       S(
@@ -188,6 +200,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Area E — Social Activities, Fitness & Health (Ocio, deporte y salud)",
     strand: "People, World & Health",
     icon: "🏃",
+    courseYear: 10,
+    courseOrder: 3,
     curriculum: "Edexcel 4SP0 Area E: Healthy/unhealthy lifestyles, smoking/alcohol/stress, sports, cinema/music/reading & eating out",
     sections: [
       S(
@@ -225,6 +239,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "IGCSE Tense Mastery — Preterite, Imperfect, Perfect, Future & Conditional",
     strand: "IGCSE Grammar Mastery",
     icon: "⏳",
+    courseYear: 10,
+    courseOrder: 4,
     curriculum: "Edexcel 4SP0 Grammar List & Paper 2 Q3c / Q6 / Q7: Mastering 6 indicative tenses & narrating across 3+ time frames",
     sections: [
       S(
@@ -260,6 +276,8 @@ export const TOPIC_META: TopicMeta[] = [
     title: "Grade-9 Structures — Subjunctive, Si Clauses, Pronouns & Idioms",
     strand: "IGCSE Grammar Mastery",
     icon: "🏆",
+    courseYear: 11,
+    courseOrder: 7,
     curriculum: "Edexcel 4SP0 Top-Band Structures: Present Subjunctive, Imperfect Subjunctive 'Si' Clauses, Pronouns & Confusable Pairs",
     sections: [
       S(

@@ -6,6 +6,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { TopicSummary } from "@/lib/server/content";
 import { STRANDS } from "@/lib/topics/meta";
+import { useCourseYearFilter } from "@/lib/courseYear";
+import { CourseYearBanner, Year11Divider } from "./CourseYearBanner";
 import { TopicCard, STRAND_STYLES, strandStyle } from "./TopicCard";
 
 const ALL = "all";
@@ -111,6 +113,22 @@ export function TopicsBrowser({ summaries }: { summaries: TopicSummary[] }) {
   const filtered = strand !== ALL || terms.length > 0;
   const strandCount = STRANDS.filter((s) => counts[s]).length;
   const comingSoon = summaries.filter((s) => !s.ready).length;
+  const year10 = useCourseYearFilter() === 10;
+  const y10AllCount = useMemo(() => summaries.filter((s) => s.courseYear === 10).length, [summaries]);
+  const y11AllCount = summaries.length - y10AllCount;
+  const { y10Results, y11Results } = useMemo(() => {
+    if (!year10) return { y10Results: [] as Result[], y11Results: [] as Result[] };
+    const sorted = [...results].sort((a, b) => {
+      const sa = a.summary;
+      const sb = b.summary;
+      if (sa.courseYear !== sb.courseYear) return sa.courseYear - sb.courseYear;
+      return sa.courseOrder - sb.courseOrder;
+    });
+    return {
+      y10Results: sorted.filter((r) => r.summary.courseYear === 10),
+      y11Results: sorted.filter((r) => r.summary.courseYear !== 10),
+    };
+  }, [year10, results]);
 
   function reset() {
     setQuery("");
@@ -122,6 +140,7 @@ export function TopicsBrowser({ summaries }: { summaries: TopicSummary[] }) {
 
   return (
     <div className="space-y-6">
+      {year10 ? <CourseYearBanner y10Count={y10AllCount} y11Count={y11AllCount} /> : null}
       <header>
         <h1 className="text-2xl font-black tracking-tight sm:text-3xl">All topics</h1>
         <p className="mt-1 text-ink-2">
@@ -197,27 +216,81 @@ export function TopicsBrowser({ summaries }: { summaries: TopicSummary[] }) {
 
       {/* ------------------------------------------------ grid */}
       {results.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map(({ summary, sections }) => (
-            <TopicCard key={summary.id} summary={summary} headingLevel={2}>
-              {summary.ready && sections.length > 0 ? (
-                <div className="border-t border-line pt-2">
-                  <p className="text-xs font-bold text-ink-2">Matching lessons</p>
-                  <ul className="mt-1 space-y-0.5">
-                    {sections.map((x) => (
-                      <li key={x.id}>
-                        <Link href={`/topic/${summary.id}?tab=learn#sec-${x.id}`} className="inline-flex min-h-10 items-center text-sm font-semibold text-brand hover:underline">
-                          {x.heading}
-                          {x.stretch ? <span className="ml-1.5 text-xs font-bold text-ink-2">(stretch)</span> : null}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+        year10 ? (
+          <div className="space-y-6">
+            {y10Results.length > 0 ? (
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {y10Results.map(({ summary, sections }) => (
+                  <TopicCard key={summary.id} summary={summary} headingLevel={2} courseYearBadge={10}>
+                    {summary.ready && sections.length > 0 ? (
+                      <div className="border-t border-line pt-2">
+                        <p className="text-xs font-bold text-ink-2">Matching lessons</p>
+                        <ul className="mt-1 space-y-0.5">
+                          {sections.map((x) => (
+                            <li key={x.id}>
+                              <Link href={`/topic/${summary.id}?tab=learn#sec-${x.id}`} className="inline-flex min-h-10 items-center text-sm font-semibold text-brand hover:underline">
+                                {x.heading}
+                                {x.stretch ? <span className="ml-1.5 text-xs font-bold text-ink-2">(stretch)</span> : null}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </TopicCard>
+                ))}
+              </div>
+            ) : null}
+            {y11Results.length > 0 ? (
+              <>
+                <Year11Divider count={y11Results.length} />
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {y11Results.map(({ summary, sections }) => (
+                    <TopicCard key={summary.id} summary={summary} headingLevel={2} courseYearBadge={11} dimmed>
+                      {summary.ready && sections.length > 0 ? (
+                        <div className="border-t border-line pt-2">
+                          <p className="text-xs font-bold text-ink-2">Matching lessons</p>
+                          <ul className="mt-1 space-y-0.5">
+                            {sections.map((x) => (
+                              <li key={x.id}>
+                                <Link href={`/topic/${summary.id}?tab=learn#sec-${x.id}`} className="inline-flex min-h-10 items-center text-sm font-semibold text-brand hover:underline">
+                                  {x.heading}
+                                  {x.stretch ? <span className="ml-1.5 text-xs font-bold text-ink-2">(stretch)</span> : null}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                    </TopicCard>
+                  ))}
                 </div>
-              ) : null}
-            </TopicCard>
-          ))}
-        </div>
+              </>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {results.map(({ summary, sections }) => (
+              <TopicCard key={summary.id} summary={summary} headingLevel={2}>
+                {summary.ready && sections.length > 0 ? (
+                  <div className="border-t border-line pt-2">
+                    <p className="text-xs font-bold text-ink-2">Matching lessons</p>
+                    <ul className="mt-1 space-y-0.5">
+                      {sections.map((x) => (
+                        <li key={x.id}>
+                          <Link href={`/topic/${summary.id}?tab=learn#sec-${x.id}`} className="inline-flex min-h-10 items-center text-sm font-semibold text-brand hover:underline">
+                            {x.heading}
+                            {x.stretch ? <span className="ml-1.5 text-xs font-bold text-ink-2">(stretch)</span> : null}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </TopicCard>
+            ))}
+          </div>
+        )
       ) : (
         <div className="card flex flex-col items-center gap-2 p-8 text-center">
           <span aria-hidden className="text-4xl">

@@ -52,6 +52,8 @@ export interface TopicSummary {
   title: string;
   strand: string;
   icon: string;
+  courseYear: 10 | 11;
+  courseOrder: number;
   summary: string;
   ready: boolean;
   sections: { id: string; heading: string; stretch: boolean }[];
@@ -70,6 +72,8 @@ export function topicSummaries(): TopicSummary[] {
       title: m.title,
       strand: m.strand,
       icon: m.icon,
+      courseYear: m.courseYear,
+      courseOrder: m.courseOrder,
       summary: t?.summary ?? "",
       ready: !!t,
       sections: m.sections.map((s) => ({ id: s.id, heading: s.heading, stretch: !!s.stretch })),

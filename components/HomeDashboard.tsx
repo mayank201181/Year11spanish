@@ -11,6 +11,8 @@ import { STRANDS, TOPIC_META } from "@/lib/topics/meta";
 import { drillById } from "@/lib/drills";
 import { isRusty, rankFor, skillDue, skillLevel, topicOfQid } from "@/lib/learning";
 import { addDaysISO, dayDiff, localISO, todayISO, weekStartISO } from "@/lib/dates";
+import { sortForYear10, useCourseYearFilter } from "@/lib/courseYear";
+import { CourseYearBanner, Year11Divider } from "./CourseYearBanner";
 import { ProgressBar, TopicCard, strandStyle } from "./TopicCard";
 
 const TOPIC_IDS = TOPIC_META.map((t) => t.id);
@@ -375,7 +377,11 @@ export function HomeDashboard({ summaries }: { summaries: TopicSummary[] }) {
   }, [data.srs, data.skills, today]);
 
   // ---- Profe Lola ----
-  const tip = useMemo(() => chooseTip(data, summaries, focusTopics, review.total, dailyDone), [data, summaries, focusTopics, review.total, dailyDone]);
+  const year10 = useCourseYearFilter() === 10;
+  const orderedForY10 = useMemo(() => (year10 ? sortForYear10(summaries) : summaries), [year10, summaries]);
+  const y10Topics = useMemo(() => orderedForY10.filter((s) => s.courseYear === 10), [orderedForY10]);
+  const y11Topics = useMemo(() => orderedForY10.filter((s) => s.courseYear !== 10), [orderedForY10]);
+  const tip = useMemo(() => chooseTip(data, orderedForY10, focusTopics, review.total, dailyDone), [data, orderedForY10, focusTopics, review.total, dailyDone]);
 
   // ---- rank ----
   const { rank, next, progress } = rankFor(data.stars);
@@ -389,6 +395,7 @@ export function HomeDashboard({ summaries }: { summaries: TopicSummary[] }) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
+      {year10 ? <CourseYearBanner y10Count={y10Topics.length} y11Count={y11Topics.length} /> : null}
       {/* ------------------------------------------------ greeting */}
       <header className="flex flex-wrap items-center gap-x-4 gap-y-3">
         <span aria-hidden className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface text-3xl shadow-sm">
@@ -752,26 +759,46 @@ export function HomeDashboard({ summaries }: { summaries: TopicSummary[] }) {
             Search all topics <span aria-hidden>&nbsp;→</span>
           </Link>
         </div>
-        {STRANDS.map((strand) => {
-          const list = summaries.filter((s) => s.strand === strand);
-          if (!list.length) return null;
-          const st = strandStyle(strand);
-          const hid = `strand-${st.slug}`;
-          return (
-            <section key={strand} aria-labelledby={hid}>
-              <h3 id={hid} className="flex items-center gap-2 text-xl font-extrabold">
-                <span aria-hidden className={`h-6 w-1.5 rounded-full ${st.bg}`} />
-                <span className={st.text}>{strand}</span>
-                <span className="text-sm font-semibold text-ink-2">· {plural(list.length, "topic")}</span>
-              </h3>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {list.map((s) => (
-                  <TopicCard key={s.id} summary={s} headingLevel={4} showStrand={false} />
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        {year10 ? (
+          <div className="space-y-6">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {y10Topics.map((s) => (
+                <TopicCard key={s.id} summary={s} headingLevel={3} showStrand courseYearBadge={10} />
+              ))}
+            </div>
+            {y11Topics.length > 0 ? (
+              <>
+                <Year11Divider count={y11Topics.length} />
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {y11Topics.map((s) => (
+                    <TopicCard key={s.id} summary={s} headingLevel={3} showStrand courseYearBadge={11} dimmed />
+                  ))}
+                </div>
+              </>
+            ) : null}
+          </div>
+        ) : (
+          STRANDS.map((strand) => {
+            const list = summaries.filter((s) => s.strand === strand);
+            if (!list.length) return null;
+            const st = strandStyle(strand);
+            const hid = `strand-${st.slug}`;
+            return (
+              <section key={strand} aria-labelledby={hid}>
+                <h3 id={hid} className="flex items-center gap-2 text-xl font-extrabold">
+                  <span aria-hidden className={`h-6 w-1.5 rounded-full ${st.bg}`} />
+                  <span className={st.text}>{strand}</span>
+                  <span className="text-sm font-semibold text-ink-2">· {plural(list.length, "topic")}</span>
+                </h3>
+                <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {list.map((s) => (
+                    <TopicCard key={s.id} summary={s} headingLevel={4} showStrand={false} />
+                  ))}
+                </div>
+              </section>
+            );
+          })
+        )}
       </section>
     </div>
   );
